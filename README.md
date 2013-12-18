@@ -1,10 +1,10 @@
 BankBDav
 ========
 
-Projet Bases de données avancées, M1 2013-2014
+Projet Bases de données avancées
 ===
 
-#Diagramme
+##Diagramme
 ![diagramme Crow's foot](diagram.png)  
 
 Légende : 
@@ -21,7 +21,9 @@ Notes :
 * CarteRetrait : anti_decouvert dit si on peut retirer plus que notre solde.
 * CartePaiement : prestige est "Premier"/"Gold"/"Platinium".
 
-#A faire
+##Schéma relationnel
+
+##A faire
 
 **Mettre une * si le truc est fait (il peut toujours y avoir des modifications.**  
 Modéliser tout.*  
