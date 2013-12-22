@@ -1,8 +1,12 @@
 -- Nettoyage de la base de donnees
+DROP TABLE carte CASCADE;
+DROP TABLE carte_retrait CASCADE;
+DROP TABLE carte_paiement CASCADE;
+DROP TABLE carte CASCADE;
 DROP TABLE historique CASCADE;
 DROP TABLE virement CASCADE;
 DROP TABLE compte CASCADE;
-DROP TABLE compte_joint CASCADE;
+DROP TABLE compte_personne CASCADE;
 DROP TABLE distributeur CASCADE;
 DROP TABLE personne CASCADE;
 DROP TABLE banque CASCADE;
@@ -39,9 +43,9 @@ CREATE TABLE distributeur (
 );
 
 CREATE TABLE compte (
-    id_compte int NOT NULL,
+    id_compte int,
     id_banque int REFERENCES banque(id_banque),
-    id_personne int REFERENCES personne(id_personne),
+    PRIMARY KEY (id_compte, id_banque),
     seuil_remuneration real NOT NULL,
     periode_remuneration int NOT NULL,
     taux_remuneration real NOT NULL,
@@ -50,30 +54,54 @@ CREATE TABLE compte (
     depassement boolean NOT NULL,
     agios real NOT NULL,
     chequier boolean NOT NULL,
-    PRIMARY KEY (id_compte,id_banque)
+    compte type_compte
 );
-CREATE TABLE compte_joint (
-    id_compte int NOT NULL,
+
+CREATE TABLE compte_personne (
+    id_compet_personne serial PRIMARY KEY,
+    id_compte int REFERENCES compte(id_compte) ON DELETE CASCADE,
     id_banque int REFERENCES banque(id_banque),
-    id_personne int REFERENCES personne(id_personne),
-    compte type_compte NOT NULL 
+    id_personne int REFERENCES personne(id_personne)
 );
 
 CREATE TABLE virement (
     id_virement serial PRIMARY KEY,
-    id_banque int REFERENCES banque(id_banque),
-    id_personne int REFERENCES personne(id_personne),
+    id_compte_personne int REFERENCES compte_personne(id_compte_personne),
     montant real NOT NULL,
     cout_initial real NOT NULL,
     date_virement int NOT NULL,
-    intervalle int ,
+    intervalle int,
     cout_periodique real
 );
 
 CREATE TABLE historique (
     jour int CHECK (jour > 0),
-    id_banque int REFERENCES banque(id_banque),
-    id_personne int REFERENCES personne(id_personne),
+    id_compte_personne int REFERENCES compte_personne(id_compte_personne),
     paiement type_paiement NOT NULL,
     montant real NOT NULL
 );
+
+CREATE TABLE carte (
+    id_carte int CHECK ( id_carte > 0),
+    id_compte_personne int REFERENCES compte_personne(id_compte_personne)
+);
+
+CREATE TABLE carte_retrait (
+    portee varchar NOT NULL,
+    montant_atomique_banque real NOT NULL, 
+    montant_atomique_autre real,
+    montant_hebdomadaire_banque real NOT NULL, 
+    montant_hebdomadaire_autre real,
+    anti_decouvert boolean NOT NULL
+) INHERITS (carte);
+
+CREATE TABLE carte_paiement (
+    portee varchar NOT NULL,
+    debit_differe boolean NOT NULL,
+    cout_annuel real NOT NULL,
+    prestige varchar(20)
+) INHERITS (carte);
+
+CREATE TABLE carte_credit (
+    revolving real check (revolving >= 0 ) NOT NULL 
+) INHERITS (carte);
