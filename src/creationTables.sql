@@ -1,12 +1,9 @@
 -- Nettoyage de la base de donnees
-DROP TABLE carte CASCADE;
-DROP TABLE carte_retrait CASCADE;
-DROP TABLE carte_paiement CASCADE;
-DROP TABLE carte CASCADE;
+DROP TABLE carte CASCADE;  -- deleted carte_(paiement, retrait, credit)
 DROP TABLE historique CASCADE;
 DROP TABLE virement CASCADE;
-DROP TABLE compte CASCADE;
 DROP TABLE compte_personne CASCADE;
+DROP TABLE compte CASCADE;
 DROP TABLE distributeur CASCADE;
 DROP TABLE personne CASCADE;
 DROP TABLE banque CASCADE;
@@ -44,8 +41,6 @@ CREATE TABLE distributeur (
 
 CREATE TABLE compte (
     id_compte int,
-    id_banque int REFERENCES banque(id_banque),
-    PRIMARY KEY (id_compte, id_banque),
     seuil_remuneration real NOT NULL,
     periode_remuneration int NOT NULL,
     taux_remuneration real NOT NULL,
@@ -54,14 +49,17 @@ CREATE TABLE compte (
     depassement boolean NOT NULL,
     agios real NOT NULL,
     chequier boolean NOT NULL,
-    compte type_compte
+    compte type_compte,
+    id_banque int REFERENCES banque(id_banque),
+    PRIMARY KEY (id_compte, id_banque)
 );
 
 CREATE TABLE compte_personne (
-    id_compet_personne serial PRIMARY KEY,
-    id_compte int REFERENCES compte(id_compte) ON DELETE CASCADE,
-    id_banque int REFERENCES banque(id_banque),
-    id_personne int REFERENCES personne(id_personne)
+    id_compte_personne serial PRIMARY KEY,
+    id_compte int,
+    id_banque int,
+    id_personne int REFERENCES personne(id_personne),
+    FOREIGN KEY (id_compte, id_banque) REFERENCES compte (id_compte, id_banque)
 );
 
 CREATE TABLE virement (
