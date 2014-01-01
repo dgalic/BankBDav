@@ -1,4 +1,5 @@
 -- Nettoyage de la base de donnees
+DROP TABLE interdit_bancaire;
 DROP TABLE carte CASCADE;  -- deleted carte_(paiement, retrait, credit)
 DROP TABLE historique CASCADE;
 DROP TABLE virement CASCADE;
@@ -103,3 +104,11 @@ CREATE TABLE carte_paiement (
 CREATE TABLE carte_credit (
     revolving real check (revolving >= 0 ) NOT NULL 
 ) INHERITS (carte);
+
+CREATE TABLE interdit_bancaire (
+    id_banque int REFERENCES banque(id_banque),
+    id_client int REFERENCES personne(id_personne),
+    motif varchar(20), --TODO : créer un type motif
+    date_debut int NOT NULL,
+    date_regularisation int DEFAULT NULL
+)
