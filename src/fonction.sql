@@ -57,7 +57,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 ---------------------
-
+-- test si un client est interdit bancaire
 CREATE OR REPLACE FUNCTION is_interdit_bancaire(client int)
 RETURNS boolean as $$
 DECLARE
