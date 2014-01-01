@@ -106,9 +106,9 @@ CREATE TABLE carte_credit (
 ) INHERITS (carte);
 
 CREATE TABLE interdit_bancaire (
-    id_banque int REFERENCES banque(id_banque),
-    id_client int REFERENCES personne(id_personne),
-    motif varchar(20), --TODO : créer un type motif
+    id_banque int REFERENCES banque(id_banque) NOT NULL,
+    id_client int REFERENCES personne(id_personne) NOT NULL,
+    motif varchar(20) , --TODO : créer un type motif
     date_debut int NOT NULL,
     date_regularisation int DEFAULT NULL
 )
