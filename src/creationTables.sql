@@ -26,13 +26,13 @@ CREATE TABLE temps (
 
 CREATE TABLE personne (
        id_personne serial PRIMARY KEY,
-       nom varchar(20) NOT NULL,
-       prenom varchar(20) NOT NULL
+       nom_personne varchar(20) NOT NULL,
+       prenom_personne varchar(20) NOT NULL
 );
 
 CREATE TABLE banque (
     id_banque serial PRIMARY KEY,
-    nom varchar(20) NOT NULL
+    nom_banque varchar(20) NOT NULL
 );
 
 CREATE TABLE distributeur (
