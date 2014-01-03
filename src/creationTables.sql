@@ -67,10 +67,12 @@ CREATE TABLE virement (
     id_virement serial PRIMARY KEY,
     id_ debiteur INTEGER REFERENCES compte(id_compte),
     id_crediteur INTEGER REFERENCES compte(id_compte),
+    montant REAL NOT NULL,
     cout_initial REAL NOT NULL,
     date_virement INTEGER NOT NULL,
     intervalle INTEGER,
-    cout_periodique real
+    cout_periodique real,
+    CHECK intervalle IN (1, 3, 6, 12)
 );
 
 CREATE TABLE historique (
