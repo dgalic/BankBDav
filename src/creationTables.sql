@@ -35,6 +35,16 @@ CREATE TABLE banque (
     nom_banque varchar(20) NOT NULL
 );
 
+CREATE TABLE banque_reference (
+    seuil_remuneration real NOT NULL,
+    periode_remuneration int NOT NULL,
+    taux_remuneration real NOT NULL,
+    decouvert_autorise real NOT NULL,
+    taux_decouvert real NOT NULL,
+    agios real NOT NULL,
+    id_banque int REFERENCES banque(id_banque)
+);    
+
 CREATE TABLE distributeur (
     id_distributeur serial PRIMARY KEY,
     id_banque int REFERENCES banque(id_banque)
@@ -42,6 +52,7 @@ CREATE TABLE distributeur (
 
 CREATE TABLE compte (
     id_compte int,
+    solde real DEFAULT 0,
     seuil_remuneration real NOT NULL,
     periode_remuneration int NOT NULL,
     taux_remuneration real NOT NULL,
