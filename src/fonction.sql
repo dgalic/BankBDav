@@ -72,10 +72,10 @@ BEGIN
     WHERE id_client = client
     LOOP
         IF date_actuel > interdit.debut AND  date_actuel < interdit.fin THEN
-            RETURN false;
+            RETURN true;
         END IF;
     END LOOP;
-    RETURN true;
+    RETURN false;
 END;
 $$ LANGUAGE plpgsql;
 ---------------------
