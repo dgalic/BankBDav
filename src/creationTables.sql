@@ -1,5 +1,5 @@
 -- Nettoyage de la base de donnees
-DROP TABLE interdit_bancaire IF EXISTS;
+DROP TABLE interdit_bancaire;
 DROP TABLE carte CASCADE;  -- deleted carte_(paiement, retrait, credit)
 DROP TABLE historique CASCADE;
 DROP TABLE virement CASCADE;
@@ -7,15 +7,18 @@ DROP TABLE compte_personne CASCADE;
 DROP TABLE compte CASCADE;
 DROP TABLE distributeur CASCADE;
 DROP TABLE personne CASCADE;
+DROP TABLE banque_reference CASCADE;
 DROP TABLE banque CASCADE;
 DROP TABLE temps CASCADE;
 
 -- Creation de type
 DROP TYPE type_compte;
 DROP TYPE type_paiement;
+DROP TYPE interval_virement;
 
 -- Creation de type
 CREATE TYPE type_compte AS ENUM ('ET','OR');
+CREATE TYPE interval_virement AS ENUM ('1','3','6','12');
 CREATE TYPE type_paiement AS ENUM ('espece','cheque','carte','virement');
 
 -- Creation des tables
@@ -32,7 +35,8 @@ CREATE TABLE personne (
 
 CREATE TABLE banque (
     id_banque serial PRIMARY KEY,
-    nom_banque varchar(20) NOT NULL
+    nom_banque varchar(20) NOT NULL,
+    nombre_compte int DEFAULT 0
 );
 
 CREATE TABLE banque_reference (
@@ -61,7 +65,7 @@ CREATE TABLE compte (
     depassement boolean NOT NULL,
     agios real NOT NULL,
     chequier boolean NOT NULL,
-    compte type_compte,
+    compte type_compte DEFAULT NULL,
     id_banque int REFERENCES banque(id_banque),
     PRIMARY KEY (id_compte, id_banque)
 );
@@ -76,14 +80,13 @@ CREATE TABLE compte_personne (
 
 CREATE TABLE virement (
     id_virement serial PRIMARY KEY,
-    id_ debiteur INTEGER REFERENCES compte(id_compte),
-    id_crediteur INTEGER REFERENCES compte(id_compte),
+    id_debiteur INTEGER REFERENCES compte_personne(id_compte_personne),
+    id_crediteur INTEGER REFERENCES compte_personne(id_compte_personne),
     montant REAL NOT NULL,
     cout_initial REAL NOT NULL,
     date_virement INTEGER NOT NULL,
-    intervalle INTEGER,
-    cout_periodique real,
-    CHECK intervalle IN (1, 3, 6, 12)
+    interval interval_virement,
+    cout_periodique real
 );
 
 CREATE TABLE historique (
