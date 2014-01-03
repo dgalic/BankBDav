@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION consulte_solde(nom VARCHAR(20), prenom VARCHAR(20) ) 
          SELECT solde INTO res FROM compte WHERE compte.nom = $1 AND compte.prenom = $2;
 	 RETURN res;
        END;
-$$ LANGUAGE 'plpgpsql';
+$$ LANGUAGE 'plpgsql';
 
 
 CREATE OR REPLACE FUNCTION consulte_solde(id INTEGER ) RETURNS REAL AS $$
@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION consulte_solde(id INTEGER ) RETURNS REAL AS $$
          SELECT solde INTO res FROM compte WHERE compte.id = $1;
 	 RETURN res;
        END;
-$$ LANGUAGE 'plpgpsql';
+$$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION aujourdhui() RETURNS INTEGER AS $$
        DECLARE
