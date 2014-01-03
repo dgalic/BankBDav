@@ -1,5 +1,5 @@
 -- Nettoyage de la base de donnees
-DROP TABLE interdit_bancaire;
+DROP TABLE interdit_bancaire IF EXISTS;
 DROP TABLE carte CASCADE;  -- deleted carte_(paiement, retrait, credit)
 DROP TABLE historique CASCADE;
 DROP TABLE virement CASCADE;
@@ -66,7 +66,6 @@ CREATE TABLE compte_personne (
 CREATE TABLE virement (
     id_virement serial PRIMARY KEY,
     id_compte_personne int REFERENCES compte_personne(id_compte_personne),
-    montant real NOT NULL,
     cout_initial real NOT NULL,
     date_virement int NOT NULL,
     intervalle int,
