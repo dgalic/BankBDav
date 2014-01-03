@@ -57,6 +57,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 ---------------------
+
 -- test si un client est interdit bancaire
 CREATE OR REPLACE FUNCTION is_interdit_bancaire(client int)
 RETURNS boolean as $$
@@ -77,5 +78,25 @@ BEGIN
     RETURN true;
 END;
 $$ LANGUAGE plpgsql;
+---------------------
 
-
+-- creation d'une banque avec valeur de reference pour le compte
+CREATE OR REPLACE FUNCTION creation_banque
+(nom_b text, seuil_rem real, periode_rem int, taux_rem real, decouvert real, taux_dec real, agios real)
+RETURNS boolean as $$
+DECLARE
+   id_b int;
+BEGIN
+    if is_banque(nom_b) THEN
+        RAISE NOTICE 'La banque % existe déjà', nom_b;
+        RETURN false;
+    END IF;
+    INSERT INTO banque (nom_banque) VALUES (nom_b);
+    SELECT id_banque INTO id_b FROM banque WHERE nom_banque = nom_b ;
+    INSERT INTO banque_reference
+    (id_banque, seuil_remuneration, periode_remuneration, taux_remuneration, decouvert_autorise, taux_decouvert, agios) VALUES
+    (id_b, seuil_rem, periode_rem, taux_rem, decouvert, taux_dec, agios);
+    RETURN true;
+END;
+$$ LANGUAGE plpgsql;
+---------------------
