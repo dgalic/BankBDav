@@ -239,6 +239,18 @@ BEGIN
         RETURN false;
     END IF;
     
+    --TODO vérifier si la id-> à vraiment un chéquier
+    IF  moyen_paiement = 'chéque' THEN
+        RAISE NOTICE 'Le depot par chéque n est pas possible';
+        RETURN false;
+    END IF;
+
+    --TODO vérifier que le virement existe
+    IF  moyen_paiement = 'virement' THEN
+        RAISE NOTICE 'Le depot par virement n est pas possible';
+        RETURN false;
+    END IF;
+
     IF montant_depot < 0 THEN
         RAISE NOTICE 'Le montant à déposer ne peut être négatif';
         RETURN false;
