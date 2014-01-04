@@ -191,13 +191,13 @@ $$ LANGUAGE 'plpgsql';
 
 -- consultation du solde des compte ou du compte de la personne
 CREATE OR REPLACE FUNCTION consultation_historique(id_client_compte INTEGER)
-RETURNS TABLE(jour_de_la_transaction INTEGER, montant_transaction INTEGER, moyen_de_paiement type_paiement) as $$
+RETURNS TABLE(jour_de_la_transaction INTEGER, montant_transaction REAL, moyen_de_paiement type_paiement) as $$
 DECLARE
     jour_actuel INTEGER;
     historique_mois record;
 BEGIN
     IF NOT id_client_compte IN (SELECT id_compte_personne  FROM compte_personne) THEN
-        RAISE NOTICE 'Le identifiant n existe pas';
+        RAISE NOTICE 'L identifiant n existe pas';
         RETURN ;
     END IF;
 
@@ -212,6 +212,49 @@ BEGIN
         RETURN QUERY
         SELECT historique_mois.jour, historique_mois.montant, historique_mois.paiement;
     END LOOP;
+END;
+$$ LANGUAGE 'plpgsql';
+----------------------
+
+-- depot sur un compte en donnant le moyen de paiement
+CREATE OR REPLACE FUNCTION depot (id_client_compte INTEGER, montant_depot REAL, moyen_paiement type_paiement)
+RETURNS boolean  as $$
+DECLARE
+    jour_actuel INTEGER;
+    depot_banque INTEGER;
+    depot_compte INTEGER;
+BEGIN
+    SELECT id_banque, id_compte
+    INTO depot_banque, depot_compte
+    FROM compte_personne
+    WHERE id_compte_personne = id_client_compte;
+
+    IF NOT FOUND THEN
+        RAISE NOTICE 'L identifiant n existe pas';
+        RETURN false;
+    END IF;
+
+    IF  moyen_paiement = 'carte' THEN
+        RAISE NOTICE 'Le depot par carte n est pas possible';
+        RETURN false;
+    END IF;
+    
+    IF montant_depot < 0 THEN
+        RAISE NOTICE 'Le montant à déposer ne peut être négatif';
+        RETURN false;
+    END IF;
+    
+    jour_actuel = aujourdhui();
+   
+    UPDATE compte
+    SET solde_compte = solde_compte + montant_depot
+    WHERE id_compte = depot_compte
+    AND id_banque = depot_banque;
+
+    INSERT INTO historique (jour, id_compte_personne, paiement, montant) 
+    VALUES (jour_actuel, id_client_compte, moyen_paiement, montant_depot);
+
+    RETURN true;
 END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
