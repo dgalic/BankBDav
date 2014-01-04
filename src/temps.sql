@@ -1,3 +1,10 @@
+DROP TABLE temps;
+
+CREATE TABLE temps (
+    jour INTEGER NOT NULL
+);
+
+
 -- renvoie le jour
 CREATE OR REPLACE FUNCTION aujourdhui() RETURNS INTEGER AS $$
        DECLARE

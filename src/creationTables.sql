@@ -22,11 +22,6 @@ CREATE TYPE interval_virement AS ENUM ('1','3','6','12');
 CREATE TYPE type_paiement AS ENUM ('espece','cheque','carte','virement');
 
 -- Creation des tables
-CREATE TABLE temps (
-    jour INTEGER CHECK (jour > 0) NOT NULL,
-    idx INTEGER DEFAULT 1 CHECK (idx=1) PRIMARY KEY
-);
-
 CREATE TABLE personne (
     id_personne SERIAL PRIMARY KEY,
     nom_personne TEXT NOT NULL,
