@@ -101,18 +101,19 @@ END;
 $$ LANGUAGE 'plpgsql';
 --------------------
 
--- consultation du solde d'un compte
-CREATE OR REPLACE FUNCTION consulte_solde(id_compte INTEGER, id_banque INTEGER) RETURNS REAL AS $$
-    DECLARE
-	    res REAL;
-    BEGIN
-        SELECT solde INTO res FROM compte WHERE compte.id_compte = $1 and compte.id_banque = $2;
-	    RETURN res;
-    END;
+-- consultation du solde d'un compte à partir de son numéro de compte et de l'identifiant de la banque
+CREATE OR REPLACE FUNCTION consulte_solde(id_compte INTEGER, id_banque INTEGER)
+RETURNS REAL AS $$
+DECLARE
+	res REAL;
+BEGIN
+    SELECT solde_compte INTO res FROM compte WHERE compte.id_compte = $1 and compte.id_banque = $2;
+	RETURN res;
+END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
 
--- revoie le jour
+-- renvoie le jour
 CREATE OR REPLACE FUNCTION aujourdhui() RETURNS INTEGER AS $$
        DECLARE
 	res INTEGER;
