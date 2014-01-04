@@ -31,7 +31,8 @@ Schéma relationnel de ce qu'on implémente.
 Création des tables.(check)  
 Ouverture d'un compte.(check)  
 Fermeture d'un compte.(check)  
-Consultation du solde.  
+Consultation du solde.(check)  
+Consultation de l'historique du mois.
 Retrait d'espèces.  
 Virement entre comptes d'une banque.  
 Virement périodique (par mois).  
