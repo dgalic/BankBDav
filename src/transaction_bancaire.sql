@@ -75,6 +75,10 @@ BEGIN
    INSERT INTO compte_personne (id_banque,id_compte,id_personne) VALUES
    (id_b, id_compte,client);
    
+   UPDATE banque 
+   SET nombre_compte = nombre_compte + 1 
+   WHERE id_banque = id_b; 
+
    RETURN true;
 END;
 $$ LANGUAGE plpgsql;
