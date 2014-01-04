@@ -100,3 +100,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 ---------------------
+
+-- consultation du solde d'un compte
+CREATE OR REPLACE FUNCTION consulte_solde(id_compte INTEGER, id_banque INTEGER) RETURNS REAL AS $$
+    DECLARE
+	    res REAL;
+    BEGIN
+        SELECT solde INTO res FROM compte WHERE compte.id_compte = $1 and compte.id_banque = $2;
+	    RETURN res;
+    END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION aujourdhui() RETURNS INTEGER AS $$
+       DECLARE
+	res INTEGER;
+       BEGIN
+	SELECT jour INTO res FROM temps;
+	RETURN res;
+       END;
+$$ LANGUAGE 'plpgsql';
