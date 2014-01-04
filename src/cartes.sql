@@ -31,7 +31,7 @@ CREATE TABLE carte_credit (
 
 -----------------------------------------------------
 
-CREATE OR REPLACE FUNCTION t_insert() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION t_insert_paiement() RETURNS TRIGGER AS $$
        DECLARE
          id INTEGER;
          line record;
@@ -47,4 +47,4 @@ $$ LANGUAGE 'plpgsql';
 CREATE TRIGGER t_insert_paiement AFTER INSERT
 ON carte_paiement
 FOR EACH ROW
-EXECUTE PROCEDURE t_insert();
+EXECUTE PROCEDURE t_insert_paiement();

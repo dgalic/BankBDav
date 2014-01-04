@@ -72,17 +72,6 @@ CREATE TABLE compte_personne (
     FOREIGN KEY (id_compte, id_banque) REFERENCES compte (id_compte, id_banque)
 );
 
-CREATE TABLE virement (
-    id_virement SERIAL PRIMARY KEY,
-    id_debiteur INTEGER REFERENCES compte_personne(id_compte_personne),
-    id_crediteur INTEGER REFERENCES compte_personne(id_compte_personne),
-    montant REAL NOT NULL,
-    cout_initial REAL NOT NULL,
-    date_virement INTEGER NOT NULL,
-    interval interval_virement,
-    cout_periodique real
-);
-
 CREATE TABLE historique (
     jour INTEGER CHECK (jour > 0),
     id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne),
