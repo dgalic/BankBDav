@@ -126,18 +126,12 @@ $$ LANGUAGE 'plpgsql';
 -- test si compte appartient à une personne
 CREATE OR REPLACE FUNCTION is_compte_personne(client_id INTEGER, compte_id INTEGER, banque_id INTEGER)
 RETURNS boolean AS $$
-DECLARE
 BEGIN
-    SELECT id_personne, id_banque, id_compte
-    FROM compte_personne
-    WHERE id_personne = client_id
-    AND id_banque = banque_id
-    AND id_compte = compte_id;
-
-    IF NOT FOUND THEN
-        RETURN false;
-    END IF;
-    RETURN true;
+    RETURN client_id IN (
+        SELECT id_personne 
+        FROM compte_personne 
+        WHERE  id_banque = banque_id 
+        AND id_compte = compte_id);
 END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
