@@ -49,10 +49,10 @@ BEGIN
    WHERE id_banque = id_b;
 
    IF seuil_rem IS NOT NULL THEN
-    seuil_r = seuim_rem;
+    seuil_r = seuil_rem;
    END IF;
    IF periode_rem IS NOT NULL THEN
-    periode_r = peridoe_rem;
+    periode_r = periode_rem;
    END IF;
    IF taux_rem IS NOT NULL THEN
     taux_r = taux_rem;

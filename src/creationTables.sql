@@ -1,6 +1,5 @@
 -- Nettoyage de la base de donnees
 DROP TABLE interdit_bancaire;
-DROP TABLE carte CASCADE;  -- deleted carte_(paiement, retrait, credit)
 DROP TABLE historique CASCADE;
 DROP TABLE virement CASCADE;
 DROP TABLE compte_personne CASCADE;
@@ -90,31 +89,6 @@ CREATE TABLE historique (
     paiement type_paiement NOT NULL,
     montant REAL NOT NULL
 );
-
-CREATE TABLE carte (
-    id_carte INTEGER CHECK ( id_carte > 0),
-    id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne)
-);
-
-CREATE TABLE carte_retrait (
-    portee varchar NOT NULL,
-    montant_atomique_banque REAL NOT NULL, 
-    montant_atomique_autre REAL,
-    montant_hebdomadaire_banque REAL NOT NULL, 
-    montant_hebdomadaire_autre REAL,
-    anti_decouvert BOOLEAN NOT NULL
-) INHERITS (carte);
-
-CREATE TABLE carte_paiement (
-    portee varchar NOT NULL,
-    debit_differe BOOLEAN NOT NULL,
-    cout_annuel REAL NOT NULL,
-    prestige varchar(20)
-) INHERITS (carte);
-
-CREATE TABLE carte_credit (
-    revolving REAL check (revolving >= 0 ) NOT NULL 
-) INHERITS (carte);
 
 CREATE TABLE interdit_bancaire (
     id_banque INTEGER REFERENCES banque(id_banque) NOT NULL,
