@@ -1,6 +1,3 @@
-
-INSERT INTO temps VALUES(1);
-
 -- renvoie le jour
 CREATE OR REPLACE FUNCTION aujourdhui() RETURNS INTEGER AS $$
        DECLARE
@@ -13,14 +10,34 @@ $$ LANGUAGE 'plpgsql';
 ----------------------
 
 
--- fait passer n jours
+-- fait passer n jours (par défaut, 1)
 CREATE OR REPLACE FUNCTION passe_jours(n INTEGER DEFAULT 1) RETURNS VOID AS $$
        DECLARE
          it INTEGER DEFAULT 1;
        BEGIN
+         ALTER TABLE temps DISABLE TRIGGER t_temps;
          WHILE it <= n LOOP
            UPDATE temps SET jour = jour+1;
            it := it+1;
          END LOOP;
+         ALTER TABLE temps ENABLE TRIGGER t_temps;
        END;
 $$ LANGUAGE 'plpgsql';
+----------------------
+
+
+CREATE OR REPLACE FUNCTION t_temps() RETURNS TRIGGER AS $$
+       DECLARE
+
+       BEGIN
+         RAISE NOTICE 'interdit de modifier le temps sans passer par la fonction passe_jours(n)';
+         RETURN OLD;
+       END;
+$$ LANGUAGE 'plpgsql';
+
+
+DROP TRIGGER IF EXISTS t_temps ON temps;
+CREATE TRIGGER t_temps BEFORE UPDATE OR DELETE
+ON temps
+FOR EACH ROW
+EXECUTE PROCEDURE t_temps();
