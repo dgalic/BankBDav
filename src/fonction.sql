@@ -31,8 +31,8 @@ $$ LANGUAGE 'plpgsql';
 ---------------------
 
 -- test si une personne existe
-CREATE OR REPLACE FUNCTION is_personne(nom text, prenom text)
-RETURNS boolean as $$
+CREATE OR REPLACE FUNCTION is_personne(nom TEXT, prenom text)
+RETURNS BOOLEAN as $$
 DECLARE
     client record;
 BEGIN
@@ -51,7 +51,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- test si une banque existe
 CREATE OR REPLACE FUNCTION is_banque(nom text)
-RETURNS boolean as $$
+RETURNS BOOLEAN as $$
 BEGIN
     RETURN nom IN (SELECT nom_banque  FROM banque);
 END;
@@ -60,7 +60,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- test si un client est interdit bancaire
 CREATE OR REPLACE FUNCTION is_interdit_bancaire(client int)
-RETURNS boolean as $$
+RETURNS BOOLEAN as $$
 DECLARE
     date_actuel int;
     interdit record;
@@ -82,8 +82,8 @@ $$ LANGUAGE 'plpgsql';
 
 -- creation d'une banque avec valeur de reference pour le compte
 CREATE OR REPLACE FUNCTION creation_banque
-(nom_b text, seuil_rem real, periode_rem int, taux_rem real, decouvert real, taux_dec real, agios real)
-RETURNS boolean as $$
+(nom_b TEXT, seuil_rem REAL, periode_rem INTEGER, taux_rem REAL, decouvert REAL, taux_dec REAL, agios real)
+RETURNS BOOLEAN as $$
 DECLARE
    id_b int;
 BEGIN
@@ -126,7 +126,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- test si compte appartient à une personne
 CREATE OR REPLACE FUNCTION is_compte_personne(client_id INTEGER, compte_id INTEGER, banque_id INTEGER)
-RETURNS boolean AS $$
+RETURNS BOOLEAN AS $$
 BEGIN
     RETURN client_id IN (
         SELECT id_personne 

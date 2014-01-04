@@ -1,13 +1,13 @@
 -- Ouverture d'un compte
 CREATE OR REPLACE FUNCTION ouverture_compte
-(nom text, prenom text, n_banque text,
-    seuil_rem real DEFAULT NULL,
-    periode_rem int DEFAULT NULL,
-    taux_rem real DEFAULT NULL,
-    decouvert real DEFAULT NULL,
-    taux_dec real DEFAULT NULL,
-    nb_agios real DEFAULT NULL)
-RETURNS boolean as $$
+(nom TEXT, prenom TEXT, n_banque TEXT,
+    seuil_rem REAL DEFAULT NULL,
+    periode_rem INTEGER DEFAULT NULL,
+    taux_rem REAL DEFAULT NULL,
+    decouvert REAL DEFAULT NULL,
+    taux_dec REAL DEFAULT NULL,
+    nb_agios REAL DEFAULT NULL)
+RETURNS BOOLEAN as $$
 DECLARE
     client int;
     id_b int;
@@ -86,7 +86,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- fermeture d'un compte avec nom, prenom, nom de la banque et l'identifiant
 CREATE OR REPLACE FUNCTION fermeture_compte(client_id INTEGER, banque_id INTEGER ,compte_id INTEGER)
-RETURNS boolean as $$
+RETURNS BOOLEAN as $$
 DECLARE
    compte_t type_compte;
 BEGIN
@@ -128,8 +128,8 @@ $$ LANGUAGE 'plpgsql';
 ---------------------
 
 -- fermeture d'un compte avec nom, prenom, nom de la banque et l'identifiant
-CREATE OR REPLACE FUNCTION fermeture_compte(nom_client text, prenom_client text, client_banque text, identifiant_compte int)
-RETURNS boolean as $$
+CREATE OR REPLACE FUNCTION fermeture_compte(nom_client TEXT, prenom_client TEXT, client_banque TEXT, identifiant_compte int)
+RETURNS BOOLEAN as $$
 DECLARE
     id_b INTEGER;
     id_p INTEGER;
@@ -160,8 +160,8 @@ $$ LANGUAGE 'plpgsql';
 ---------------------
 
 -- consultation du solde des compte ou du compte de la personne
-CREATE OR REPLACE FUNCTION consultation_solde(nom text, prenom text)
-RETURNS TABLE(banque text, compte INTEGER, solde REAL, type_compte type_compte) as $$
+CREATE OR REPLACE FUNCTION consultation_solde(nom TEXT, prenom text)
+RETURNS TABLE(banque TEXT, compte INTEGER, solde REAL, type_compte type_compte) as $$
 DECLARE
     client_compte record; 
     client INTEGER;
@@ -218,7 +218,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- depot sur un compte en donnant le moyen de paiement
 CREATE OR REPLACE FUNCTION depot (id_client_compte INTEGER, montant_depot REAL, moyen_paiement type_paiement)
-RETURNS boolean  as $$
+RETURNS BOOLEAN  as $$
 DECLARE
     jour_actuel INTEGER;
     depot_banque INTEGER;

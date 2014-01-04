@@ -18,68 +18,68 @@ DROP TYPE interval_virement;
 
 -- Creation de type
 CREATE TYPE type_compte AS ENUM ('AND','OR');
-CREATE TYPE interval_virement AS ENUM ('1','3','6','12');
+CREATE TYPE interval_virement AS ENUM ('1','3','6','12'); 
 CREATE TYPE type_paiement AS ENUM ('espece','cheque','carte','virement');
 
 -- Creation des tables
 CREATE TABLE temps (
-    jour int CHECK (jour > 0) NOT NULL,
-    idx int DEFAULT 1 CHECK (idx=1) PRIMARY KEY
+    jour INTEGER CHECK (jour > 0) NOT NULL,
+    idx INTEGER DEFAULT 1 CHECK (idx=1) PRIMARY KEY
 );
 
 CREATE TABLE personne (
-       id_personne serial PRIMARY KEY,
-       nom_personne text NOT NULL,
-       prenom_personne text NOT NULL
+    id_personne SERIAL PRIMARY KEY,
+    nom_personne TEXT NOT NULL,
+    prenom_personne TEXT NOT NULL
 );
 
 CREATE TABLE banque (
-    id_banque serial PRIMARY KEY,
-    nom_banque text NOT NULL,
-    nombre_compte int DEFAULT 0
+    id_banque SERIAL PRIMARY KEY,
+    nom_banque TEXT NOT NULL,
+    nombre_compte INTEGER DEFAULT 0
 );
 
 CREATE TABLE banque_reference (
-    seuil_remuneration real NOT NULL,
-    periode_remuneration int NOT NULL,
-    taux_remuneration real NOT NULL,
-    decouvert_autorise real NOT NULL,
-    taux_decouvert real NOT NULL,
-    agios real NOT NULL,
-    id_banque int REFERENCES banque(id_banque)
+    seuil_remuneration REAL NOT NULL,
+    periode_remuneration INTEGER NOT NULL,
+    taux_remuneration REAL NOT NULL,
+    decouvert_autorise REAL NOT NULL,
+    taux_decouvert REAL NOT NULL,
+    agios REAL NOT NULL,
+    id_banque INTEGER REFERENCES banque(id_banque)
 );    
 
 CREATE TABLE distributeur (
-    id_distributeur serial PRIMARY KEY,
-    id_banque int REFERENCES banque(id_banque)
+    id_distributeur SERIAL PRIMARY KEY,
+    id_banque INTEGER REFERENCES banque(id_banque)
 );
 
 CREATE TABLE compte (
-    id_compte int,
-    solde_compte real DEFAULT 0,
-    seuil_remuneration real NOT NULL,
-    periode_remuneration int NOT NULL,
-    taux_remuneration real NOT NULL,
-    decouvert_autorise real NOT NULL,
-    taux_decouvert real NOT NULL,
-    depassement boolean NOT NULL,
-    agios real NOT NULL,
-    chequier boolean NOT NULL,
+    id_compte INTEGER,
+    solde_compte REAL DEFAULT 0,
+    seuil_remuneration REAL NOT NULL,
+    periode_remuneration INTEGER NOT NULL,
+    taux_remuneration REAL NOT NULL,
+    decouvert_autorise REAL NOT NULL,
+    taux_decouvert REAL NOT NULL,
+    depassement BOOLEAN NOT NULL,
+    agios REAL NOT NULL,
+    chequier BOOLEAN NOT NULL,
     typ_compte type_compte DEFAULT NULL,
-    id_banque int REFERENCES banque(id_banque),
+    id_banque INTEGER REFERENCES banque(id_banque),
     PRIMARY KEY (id_compte, id_banque)
 );
 
 CREATE TABLE compte_personne (
-    id_compte_personne serial PRIMARY KEY,
-    id_compte int,
-    id_banque int,
-    id_personne int REFERENCES personne(id_personne),
+    id_compte_personne SERIAL PRIMARY KEY,
+    id_compte INTEGER,
+    id_banque INTEGER,
+    id_personne INTEGER REFERENCES personne(id_personne),
     FOREIGN KEY (id_compte, id_banque) REFERENCES compte (id_compte, id_banque)
 );
 
 CREATE TABLE virement (
-    id_virement serial PRIMARY KEY,
+    id_virement SERIAL PRIMARY KEY,
     id_debiteur INTEGER REFERENCES compte_personne(id_compte_personne),
     id_crediteur INTEGER REFERENCES compte_personne(id_compte_personne),
     montant REAL NOT NULL,
@@ -90,41 +90,41 @@ CREATE TABLE virement (
 );
 
 CREATE TABLE historique (
-    jour int CHECK (jour > 0),
-    id_compte_personne int REFERENCES compte_personne(id_compte_personne),
+    jour INTEGER CHECK (jour > 0),
+    id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne),
     paiement type_paiement NOT NULL,
-    montant real NOT NULL
+    montant REAL NOT NULL
 );
 
 CREATE TABLE carte (
-    id_carte int CHECK ( id_carte > 0),
-    id_compte_personne int REFERENCES compte_personne(id_compte_personne)
+    id_carte INTEGER CHECK ( id_carte > 0),
+    id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne)
 );
 
 CREATE TABLE carte_retrait (
     portee varchar NOT NULL,
-    montant_atomique_banque real NOT NULL, 
-    montant_atomique_autre real,
-    montant_hebdomadaire_banque real NOT NULL, 
-    montant_hebdomadaire_autre real,
-    anti_decouvert boolean NOT NULL
+    montant_atomique_banque REAL NOT NULL, 
+    montant_atomique_autre REAL,
+    montant_hebdomadaire_banque REAL NOT NULL, 
+    montant_hebdomadaire_autre REAL,
+    anti_decouvert BOOLEAN NOT NULL
 ) INHERITS (carte);
 
 CREATE TABLE carte_paiement (
     portee varchar NOT NULL,
-    debit_differe boolean NOT NULL,
-    cout_annuel real NOT NULL,
+    debit_differe BOOLEAN NOT NULL,
+    cout_annuel REAL NOT NULL,
     prestige varchar(20)
 ) INHERITS (carte);
 
 CREATE TABLE carte_credit (
-    revolving real check (revolving >= 0 ) NOT NULL 
+    revolving REAL check (revolving >= 0 ) NOT NULL 
 ) INHERITS (carte);
 
 CREATE TABLE interdit_bancaire (
-    id_banque int REFERENCES banque(id_banque) NOT NULL,
-    id_client int REFERENCES personne(id_personne) NOT NULL,
+    id_banque INTEGER REFERENCES banque(id_banque) NOT NULL,
+    id_client INTEGER REFERENCES personne(id_personne) NOT NULL,
     motif varchar(20) , --TODO : créer un type motif
-    date_debut int NOT NULL,
-    date_regularisation int DEFAULT NULL
+    date_debut INTEGER NOT NULL,
+    date_regularisation INTEGER DEFAULT NULL
 )
