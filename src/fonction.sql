@@ -65,7 +65,7 @@ DECLARE
     date_actuel int;
     interdit record;
 BEGIN
-    SELECT jour INTO date_actuel FROM temps;
+    date_actuel := aujourdhui();
     FOR interdit IN
     SELECT date_debut AS debut, date_regularisation AS fin
     FROM interdit_bancaire

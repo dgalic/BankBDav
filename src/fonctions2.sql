@@ -17,15 +17,6 @@ CREATE OR REPLACE FUNCTION consulte_solde(id INTEGER ) RETURNS REAL AS $$
        END;
 $$ LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE FUNCTION aujourdhui() RETURNS INTEGER AS $$
-       DECLARE
-	res INTEGER;
-       BEGIN
-	SELECT jour INTO res FROM temps;
-	RETURN res;
-       END;
-$$ LANGUAGE 'plpgsql';
-
 
 CREATE OR REPLACE FUNCTION virement_unitaire(id_src INTEGER, id_dest INTEGER, mont REAL, cout REAL DEFAULT 0) RETURNS VOID AS $$
        DECLARE

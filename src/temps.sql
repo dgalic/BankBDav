@@ -1,16 +1,16 @@
 DROP TABLE temps;
 
 CREATE TABLE temps (
-    jour INTEGER NOT NULL
+    date INTEGER NOT NULL
 );
 
 
--- renvoie le jour
+-- renvoie le jour courant
 CREATE OR REPLACE FUNCTION aujourdhui() RETURNS INTEGER AS $$
        DECLARE
 	res INTEGER;
        BEGIN
-	SELECT jour INTO res FROM temps;
+	SELECT date INTO res FROM temps;
 	RETURN res;
        END;
 $$ LANGUAGE 'plpgsql';
@@ -24,7 +24,7 @@ CREATE OR REPLACE FUNCTION passe_jours(n INTEGER DEFAULT 1) RETURNS VOID AS $$
        BEGIN
          ALTER TABLE temps DISABLE TRIGGER t_temps;
          WHILE it <= n LOOP
-           UPDATE temps SET jour = jour+1;
+           UPDATE temps SET date = date+1;
            it := it+1;
          END LOOP;
          ALTER TABLE temps ENABLE TRIGGER t_temps;
@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION passe_jours(n INTEGER DEFAULT 1) RETURNS VOID AS $$
 $$ LANGUAGE 'plpgsql';
 ----------------------
 
-
+-- déclenchement suite à une tentative de modification du temps
 CREATE OR REPLACE FUNCTION t_temps() RETURNS TRIGGER AS $$
        DECLARE
 
@@ -50,3 +50,4 @@ CREATE TRIGGER t_temps BEFORE INSERT OR UPDATE OR DELETE
 ON temps
 FOR EACH ROW
 EXECUTE PROCEDURE t_temps();
+----------------------------
