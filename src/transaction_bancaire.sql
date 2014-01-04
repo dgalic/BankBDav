@@ -158,3 +158,34 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 ---------------------
+
+-- consultation du solde des compte ou du compte de la personne
+CREATE OR REPLACE FUNCTION consultation_solde(nom text, prenom text)
+RETURNS TABLE(banque text, compte INTEGER, solde REAL, type_compte type_compte) as $$
+DECLARE
+    client_compte record; 
+    client INTEGER;
+BEGIN
+    SELECT id_personne
+    INTO client
+    FROM personne
+    WHERE nom_personne = nom 
+    AND prenom_personne = prenom;
+
+    IF NOT FOUND THEN
+        RAISE NOTICE 'Le client % % n existe pas', nom_client, prenom_client;
+        RETURN ;
+    END IF;
+
+    FOR client_compte IN
+        (SELECT nom_banque , id_compte, solde_compte, typ_compte 
+        FROM compte NATURAL JOIN banque NATURAL JOIN compte_personne 
+        WHERE id_personne = client )
+    LOOP
+    RETURN QUERY
+    SELECT client_compte.nom_banque, client_compte.id_compte, client_compte.solde_compte, client_compte.typ_compte;
+    END LOOP;
+END;
+$$ LANGUAGE 'plpgsql';
+----------------------
+
