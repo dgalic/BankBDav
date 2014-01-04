@@ -1,5 +1,5 @@
 DROP TABLE virement CASCADE;
-CREATE TYPE interval_virement AS ENUM ('1','3','6','12'); 
+CREATE TYPE interval_virement AS ENUM ('mensuel','trimestriel','semestriel','annuel'); 
 
 
 CREATE TABLE virement (

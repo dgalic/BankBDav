@@ -30,7 +30,9 @@ CREATE TABLE carte_credit (
 ) INHERITS (carte);
 
 -----------------------------------------------------
-
+-- les trois triggers suivant servent à garantir la validité des id
+-- même à travers l'héritage (bancal en pgsql).
+----------------------------------------------------
 CREATE OR REPLACE FUNCTION t_insert_paiement() RETURNS TRIGGER AS $$
        DECLARE
          id INTEGER;
@@ -48,3 +50,43 @@ CREATE TRIGGER t_insert_paiement AFTER INSERT
 ON carte_paiement
 FOR EACH ROW
 EXECUTE PROCEDURE t_insert_paiement();
+
+------------------------------------------------
+
+CREATE OR REPLACE FUNCTION t_insert_credit() RETURNS TRIGGER AS $$
+       DECLARE
+         id INTEGER;
+         line record;
+       BEGIN
+         SELECT id_carte INTO id FROM carte ORDER BY id_carte DESC LIMIT 1;
+         id := id + 1;
+         UPDATE carte_credit SET id_carte = id WHERE id_carte = NEW.id_carte;
+         --INSERT INTO carte_paiement VALUES(id, NEW.id_compte_personne, NEW.portee, NEW.debit_differe, NEW.cout_annuel, NEW.prestige);
+         RETURN NEW;
+       END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER t_insert_credit AFTER INSERT
+ON carte_credit
+FOR EACH ROW
+EXECUTE PROCEDURE t_insert_credit();
+
+------------------------------------------------
+
+CREATE OR REPLACE FUNCTION t_insert_retrait() RETURNS TRIGGER AS $$
+       DECLARE
+         id INTEGER;
+         line record;
+       BEGIN
+         SELECT id_carte INTO id FROM carte ORDER BY id_carte DESC LIMIT 1;
+         id := id + 1;
+         UPDATE carte_retrait SET id_carte = id WHERE id_carte = NEW.id_carte;
+         --INSERT INTO carte_retrait VALUES(id, NEW.id_compte_personne, NEW.portee, NEW.debit_differe, NEW.cout_annuel, NEW.prestige);
+         RETURN NEW;
+       END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER t_insert_retrait AFTER INSERT
+ON carte_retrait
+FOR EACH ROW
+EXECUTE PROCEDURE t_insert_retrait();
