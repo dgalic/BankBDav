@@ -67,7 +67,7 @@ BEGIN
     ref_agios = agios;
    END IF;
 
-   INSERT INTO compte  
+   INSERT INTO compte
     (id_compte, seuil_remuneration, periode_remuneration,taux_remuneration,
     decouvert_autorise,taux_decouvert,depassement,agios,chequier,id_banque) VALUES
     (id_compte, seuil_r, periode_r, taux_r, dec, taux_d, false, ref_agios, false,id_b);
@@ -75,11 +75,86 @@ BEGIN
    INSERT INTO compte_personne (id_banque,id_compte,id_personne) VALUES
    (id_b, id_compte,client);
    
-   UPDATE banque 
-   SET nombre_compte = nombre_compte + 1 
-   WHERE id_banque = id_b; 
+   UPDATE banque
+   SET nombre_compte = nombre_compte + 1
+   WHERE id_banque = id_b;
 
    RETURN true;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE 'plpgsql';
+---------------------
+
+-- fermeture d'un compte avec nom, prenom, nom de la banque et l'identifiant
+CREATE OR REPLACE FUNCTION fermeture_compte(client_id INTEGER, banque_id INTEGER ,compte_id INTEGER)
+RETURNS boolean as $$
+DECLARE
+   compte_t type_compte;
+BEGIN
+    IF NOT is_compte_personne(client_id,compte_id,banque_id) THEN
+       RAISE NOTICE 'Ce compte ne vous appartiernt pas';
+       RETURN false;
+    END IF;
+
+    IF NOT (consulte_solde(compte_id, banque_id) = 0) THEN
+       RAISE NOTICE 'Ce compte n est pas vide';
+       RETURN false;
+    END IF;
+    
+    --TODO si le temps implementer les comptes joints
+    --TODO si carte implementer supprimer les cartes jointes au compte
+    --TODO supprimer l'historique du compte
+
+    SELECT compte INTO compte_t
+    FROM compte
+    WHERE id_compte = compte_id
+    AND id_banque = banque_id;
+    
+    DELETE FROM compte_personne
+    WHERE id_personne = client_id
+    AND id_banque = banque_id
+    AND id_compte = compte_id;
+
+    DELETE FROM compte
+    WHERE id_banque = banque_id
+    AND id_compte = compte_id;
+
+    UPDATE banque
+    SET nombre_compte = nombre_compte - 1
+    WHERE id_banque = banque_id;
+
+    RETURN true;
+END
+$$ LANGUAGE 'plpgsql';
+---------------------
+
+-- fermeture d'un compte avec nom, prenom, nom de la banque et l'identifiant
+CREATE OR REPLACE FUNCTION fermeture_compte(nom_client text, prenom_client text, client_banque text, identifiant_compte int)
+RETURNS boolean as $$
+DECLARE
+    id_b INTEGER;
+    id_p INTEGER;
+BEGIN
+    SELECT id_banque
+    INTO id_b
+    FROM banque
+    WHERE nom_banque = client_banque;
+
+   IF NOT FOUND THEN
+        RAISE NOTICE 'La banque % n existe pas', n_banque;
+        RETURN false;
+    END IF;
+
+    SELECT id_personne
+    INTO id_p
+    FROM personne
+    WHERE nom_personne = nom_client
+    AND prenom_personne = prenom_client;
+
+    IF NOT FOUND THEN
+        RAISE NOTICE 'Le client % % n existe pas', nom_client, prenom_client;
+        RETURN false;
+    END IF;
+    RETURN  fermeture_compte(id_p,id_b,identifiant_compte);
+END;
+$$ LANGUAGE 'plpgsql';
 ---------------------
