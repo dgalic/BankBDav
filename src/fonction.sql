@@ -11,7 +11,7 @@ BEGIN
     SELECT client.n, client.p;
     END LOOP;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE 'plpgsql';
 ---------------------
 
 -- list les banques existante
@@ -27,7 +27,7 @@ BEGIN
     SELECT banque.b;
     END LOOP;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE 'plpgsql';
 ---------------------
 
 -- test si une personne existe
@@ -46,7 +46,7 @@ BEGIN
     END LOOP;
     RETURN false;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE 'plpgsql';
 ---------------------
 
 -- test si une banque existe
@@ -55,7 +55,7 @@ RETURNS boolean as $$
 BEGIN
     RETURN nom IN (SELECT nom_banque  FROM banque);
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE 'plpgsql';
 ---------------------
 
 -- test si un client est interdit bancaire
@@ -77,7 +77,7 @@ BEGIN
     END LOOP;
     RETURN false;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE 'plpgsql';
 ---------------------
 
 -- creation d'une banque avec valeur de reference pour le compte
@@ -98,8 +98,8 @@ BEGIN
     (id_b, seuil_rem, periode_rem, taux_rem, decouvert, taux_dec, agios);
     RETURN true;
 END;
-$$ LANGUAGE plpgsql;
----------------------
+$$ LANGUAGE 'plpgsql';
+--------------------
 
 -- consultation du solde d'un compte
 CREATE OR REPLACE FUNCTION consulte_solde(id_compte INTEGER, id_banque INTEGER) RETURNS REAL AS $$
@@ -110,7 +110,9 @@ CREATE OR REPLACE FUNCTION consulte_solde(id_compte INTEGER, id_banque INTEGER) 
 	    RETURN res;
     END;
 $$ LANGUAGE 'plpgsql';
+----------------------
 
+-- revoie le jour
 CREATE OR REPLACE FUNCTION aujourdhui() RETURNS INTEGER AS $$
        DECLARE
 	res INTEGER;
@@ -119,3 +121,23 @@ CREATE OR REPLACE FUNCTION aujourdhui() RETURNS INTEGER AS $$
 	RETURN res;
        END;
 $$ LANGUAGE 'plpgsql';
+----------------------
+
+-- test si compte appartient à une personne
+CREATE OR REPLACE FUNCTION is_compte_personne(client_id INTEGER, compte_id INTEGER, banque_id INTEGER)
+RETURNS boolean AS $$
+DECLARE
+BEGIN
+    SELECT id_personne, id_banque, id_compte
+    FROM compte_personne
+    WHERE id_personne = client_id
+    AND id_banque = banque_id
+    AND id_compte = compte_id;
+
+    IF NOT FOUND THEN
+        RETURN false;
+    END IF;
+    RETURN true;
+END;
+$$ LANGUAGE 'plpgsql';
+----------------------
