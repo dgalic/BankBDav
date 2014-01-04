@@ -28,9 +28,9 @@ Notes :
 **Mettre une * si le truc est fait (il peut toujours y avoir des modifications.**  
 Modéliser tout.*  
 Schéma relationnel de ce qu'on implémente.  
-Création des tables.  
-Ouverture d'un compte.  
-Fermeture d'un compte.  
+Création des tables.(check)  
+Ouverture d'un compte.(check)  
+Fermeture d'un compte.(check)  
 Consultation du solde.  
 Retrait d'espèces.  
 Virement entre comptes d'une banque.  
