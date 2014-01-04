@@ -113,17 +113,6 @@ END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
 
--- renvoie le jour
-CREATE OR REPLACE FUNCTION aujourdhui() RETURNS INTEGER AS $$
-       DECLARE
-	res INTEGER;
-       BEGIN
-	SELECT jour INTO res FROM temps;
-	RETURN res;
-       END;
-$$ LANGUAGE 'plpgsql';
-----------------------
-
 -- test si compte appartient à une personne
 CREATE OR REPLACE FUNCTION is_compte_personne(client_id INTEGER, compte_id INTEGER, banque_id INTEGER)
 RETURNS BOOLEAN AS $$

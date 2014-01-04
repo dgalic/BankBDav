@@ -1,8 +1,5 @@
 -- Insertion des données
 
-INSERT INTO temps (jour) VALUES
-(5);
-
 INSERT INTO personne (nom_personne, prenom_personne) VALUES
 ('Galichet','David'),
 ('Cruise','TOM'),
