@@ -189,3 +189,29 @@ END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
 
+-- consultation du solde des compte ou du compte de la personne
+CREATE OR REPLACE FUNCTION consultation_historique(id_client_compte INTEGER)
+RETURNS TABLE(jour_de_la_transaction INTEGER, montant_transaction INTEGER, moyen_de_paiement type_paiement) as $$
+DECLARE
+    jour_actuel INTEGER;
+    historique_mois record;
+BEGIN
+    IF NOT id_client_compte IN (SELECT id_compte_personne  FROM compte_personne) THEN
+        RAISE NOTICE 'Le identifiant n existe pas';
+        RETURN ;
+    END IF;
+
+    jour_actuel = aujourdhui() / 30;
+
+    FOR historique_mois IN
+        SELECT jour, montant, paiement
+        FROM historique
+        WHERE id_compte_personne = id_client_compte
+        AND (jour/30) = jour_actuel
+    LOOP
+        RETURN QUERY
+        SELECT historique_mois.jour, historique_mois.montant, historique_mois.paiement;
+    END LOOP;
+END;
+$$ LANGUAGE 'plpgsql';
+----------------------
