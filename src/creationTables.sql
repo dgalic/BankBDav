@@ -17,7 +17,7 @@ DROP TYPE type_paiement;
 DROP TYPE interval_virement;
 
 -- Creation de type
-CREATE TYPE type_compte AS ENUM ('ET','OR');
+CREATE TYPE type_compte AS ENUM ('AND','OR');
 CREATE TYPE interval_virement AS ENUM ('1','3','6','12');
 CREATE TYPE type_paiement AS ENUM ('espece','cheque','carte','virement');
 
