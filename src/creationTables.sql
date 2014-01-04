@@ -29,13 +29,13 @@ CREATE TABLE temps (
 
 CREATE TABLE personne (
        id_personne serial PRIMARY KEY,
-       nom_personne varchar(20) NOT NULL,
-       prenom_personne varchar(20) NOT NULL
+       nom_personne text NOT NULL,
+       prenom_personne text NOT NULL
 );
 
 CREATE TABLE banque (
     id_banque serial PRIMARY KEY,
-    nom_banque varchar(20) NOT NULL,
+    nom_banque text NOT NULL,
     nombre_compte int DEFAULT 0
 );
 
@@ -56,7 +56,7 @@ CREATE TABLE distributeur (
 
 CREATE TABLE compte (
     id_compte int,
-    solde real DEFAULT 0,
+    solde_compte real DEFAULT 0,
     seuil_remuneration real NOT NULL,
     periode_remuneration int NOT NULL,
     taux_remuneration real NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE compte (
     depassement boolean NOT NULL,
     agios real NOT NULL,
     chequier boolean NOT NULL,
-    compte type_compte DEFAULT NULL,
+    typ_compte type_compte DEFAULT NULL,
     id_banque int REFERENCES banque(id_banque),
     PRIMARY KEY (id_compte, id_banque)
 );
