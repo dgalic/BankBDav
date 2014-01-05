@@ -13,3 +13,5 @@
 
 --insertion des données
 \i donnee.sql
+
+\i virements.sql

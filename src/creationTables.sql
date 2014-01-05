@@ -74,4 +74,4 @@ CREATE TABLE interdit_bancaire (
     motif varchar(20) , --TODO : créer un type motif
     date_debut INTEGER NOT NULL,
     date_regularisation INTEGER DEFAULT NULL
-)
+);
