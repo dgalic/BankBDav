@@ -230,7 +230,7 @@ BEGIN
     WHERE id_compte_personne = id_client_compte;
 
     IF NOT FOUND THEN
-        RAISE NOTICE 'L identifiant n existe pas';
+        RAISE NOTICE 'L identifiant % n existe pas', id_client_compte;
         RETURN false;
     END IF;
 
@@ -239,18 +239,6 @@ BEGIN
         RETURN false;
     END IF;
     
-    --TODO vérifier si la id-> à vraiment un chéquier
-    IF  moyen_paiement = 'cheque' THEN
-        RAISE NOTICE 'Le depot par chéque n est pas possible';
-        RETURN false;
-    END IF;
-
-    --TODO vérifier que le virement existe
-    IF  moyen_paiement = 'virement' THEN
-        RAISE NOTICE 'Le depot par virement n est pas possible';
-        RETURN false;
-    END IF;
-
     IF montant_depot < 0 THEN
         RAISE NOTICE 'Le montant à déposer ne peut être négatif';
         RETURN false;
@@ -272,21 +260,90 @@ $$ LANGUAGE 'plpgsql';
 ----------------------
 
 -- retire l'argent d'un compte, en vérifiant les affaires de découvert
-CREATE OR REPLACE FUNCTION retrait(_id_client INTEGER, _id_compte INTEGER, montant REAL) RETURNS BOOLEAN AS $$
-       DECLARE
-         _c compte%ROWTYPE;
-         _cp compte_personne%ROWTYPE;
-       BEGIN
-         SELECT * INTO _cp FROM compte_personne WHERE id_personne = _id_client AND id_compte = _id_compte;
-         IF _cp IS NULL THEN
-           RAISE 'Le compte % n''appartient pas à %', _id_compte, _id_client;
-         END IF;
-         SELECT * INTO _c FROM compte WHERE id_compte = _id_compte;
-         IF _c.depassement = TRUE OR _c.solde_compte >= montant OR montant-_c.solde_compte <= _c.decouvert_autorise THEN
-           UPDATE compte SET solde_compte = solde_compte - montant WHERE id_compte = _id_compte;
+CREATE OR REPLACE FUNCTION retrait( id_client_compte INTEGER, montant_retrait REAL, moyen_paiement type_paiement)
+RETURNS BOOLEAN AS $$
+DECLARE
+    jour_actuel INTEGER;
+    retrait_banque INTEGER;
+    retrait_compte INTEGER;
+    retrait_negatif REAL;
+    _depassement_autorise REAL;
+    _c compte%ROWTYPE;
+BEGIN
+    SELECT id_banque, id_compte
+        INTO retrait_banque, retrait_compte
+        FROM compte_personne
+        WHERE id_compte_personne = id_client_compte;
+
+    IF NOT FOUND THEN
+        RAISE NOTICE 'L identifiant % n existe pas', id_client_compte;
+        RETURN false;
+    END IF;
+         
+    SELECT * INTO _c 
+        FROM compte 
+        WHERE id_compte = retrait_compte
+        AND id_banque = retrait_banque;
+         
+    IF _c.depassement = TRUE 
+        OR _c.solde_compte >= montant_retrait 
+        OR montant-_c.solde_compte <= _c.decouvert_autorise THEN
+            
+            jour_actuel = aujourdhui();
+            
+            UPDATE compte 
+                SET solde_compte = solde_compte - montant_retrait 
+                WHERE id_compte = retrait_compte
+                AND id_banque = retrait_banque;
+            
+            retrait_negatif = 0 - montant_retrait;
+            INSERT INTO historique (jour, id_compte_personne, paiement, retrait_negatif) 
+                VALUES (jour_actuel, id_client_compte, moyen_paiement, montant_depot);
+           
            RETURN TRUE;
-         END IF;
-         RAISE 'Impossible de retirer autant d''argent : il y a % + % de découvert sans dépassement autorisé. Et vous voulez %', _c.solde_compte, _c.decouvert_autorise, montant;
-         RETURN FALSE;
-       END;
+    END IF;
+
+    _depassement_autorise = _c.solde_compte + _c.decouvert_autorise;
+    RAISE NOTICE 'Impossible de retirer autant d''argent : il y a % de découvert sans dépassement autorisé\n',_depassement_autorise;
+    RAISE NOTICE 'Et vous voulez retirer %\n', montant_retrait;
+    RETURN FALSE;
+END;
 $$ LANGUAGE 'plpgsql';
+---------------------
+
+-- depose un chéque sur un compte
+CREATE OR REPLACE FUNCTION depot_cheque (id_dest INTEGER, montant_depot REAL, id_src INTEGER)
+RETURNS BOOLEAN  as $$
+DECLARE
+    src_banque INTEGER;
+    src_compte INTEGER;
+BEGIN
+    -- vérifie que id_src existe
+    SELECT id_banque, id_compte
+    INTO src_banque, src_compte
+    FROM compte_personne
+    WHERE id_compte_personne = id_src;
+
+    IF NOT FOUND THEN
+        RAISE NOTICE 'L identifiant de la source % n existe pas', id_src;
+        RETURN false;
+    END IF;
+
+    IF NOT 
+        (SELECT chequier 
+            FROM compte 
+            WHERE id_compte = src_compte 
+            AND id_banque = src_banque) THEN
+        RAISE NOTICE 'La source % ne posséde pas de chequier', id_src;
+        RETURN false;
+    END IF;
+
+    IF NOT retrait(id_src, montant, 'cheque')THEN
+        RAISE NOTICE 'L identifiant de la source % n existe pas', id_src;
+        RETURN false;
+    END IF;
+
+    RETURN depot(id_dest, montant_depot, 'cheque');
+END;
+$$ LANGUAGE 'plpgsql';
+----------------------
