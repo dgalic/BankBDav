@@ -108,37 +108,41 @@ CREATE OR REPLACE FUNCTION carte_paiement() RETURNS VOID AS $$
 $$ LANGUAGE 'plpgsql';
 
 -- création d'une carte de crédit pour le client 
-CREATE OR REPLACE FUNCTION carte_credit(id_personne INTEGER) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION carte_credit(_id_personne INTEGER, _id_banque INTEGER, _id_compte INTEGER) RETURNS VOID AS $$
        DECLARE
         id INTEGER;
+        id_cp INTEGER;
        BEGIN
         ALTER TABLE carte_credit DISABLE TRIGGER t_interdit_credit;
         id := id_carte_suivant();
-        INSERT INTO carte_credit(id_carte, id_compte_personne, revolving) VALUES(id, id_personne, 0);
-        RAISE NOTICE 'Le client % possède maintenant la carte de crédit n°%', id_personne, id;
+        id_cp = to_compte_personne(_id_personne, _id_compte, _id_banque);
+        IF id_cp IS NULL THEN
+          RAISE 'Le client % n''a pas le compte % chez la banque %', _id_personne, _id_compte, _id_banque;
+        END IF;
+        INSERT INTO carte_credit(id_carte, id_compte_personne, revolving) VALUES(id, id_cp, 0);
+        RAISE NOTICE 'Le client % possède maintenant la carte de crédit n°%', _id_personne, id;
         ALTER TABLE carte_credit ENABLE TRIGGER t_interdit_credit;
        END;
 $$ LANGUAGE 'plpgsql';
 
--- ajoute du crédit à la carte tiré depuis le compte
-CREATE OR REPLACE FUNCTION compte_to_revolving(_id_personne INTEGER, _id_carte INTEGER, _id_compte INTEGER, _id_banque INTEGER, montant REAL) RETURNS VOID AS $$
+
+
+-- ajoute du crédit à la carte tiré depuis le compte lié
+CREATE OR REPLACE FUNCTION compte_to_revolving(_id_personne INTEGER, _id_carte INTEGER,  montant REAL) RETURNS VOID AS $$
        DECLARE
-         cp compte_personne%ROWTYPE;
-         card carte_credit%ROWTYPE;
          nv_montant REAL;
+         infos RECORD;
+         id_cp INTEGER;
        BEGIN
          IF montant <= 0 THEN
             RAISE 'pour faire un retrait, utiliser la fonction retrait_revolving';
          END IF;
-         SELECT * INTO cp FROM compte_personne WHERE id_compte = _id_compte AND id_personne = _id_personne;
-         IF cp IS NULL THEN
-           RAISE 'ce compte n''est pas le votre';
+          SELECT id_compte_personne INTO id_cp FROM carte WHERE id_carte = _id_carte;
+         infos := from_compte_personne(id_cp);
+         IF infos IS NULL OR infos.id_personne != _id_personne THEN
+           RAISE 'cette carte n''est pas le votre', _id_compte;
          END IF;
-         SELECT * INTO card FROM carte_credit WHERE id_carte = _id_carte AND id_compte_personne = _id_personne;
-         IF card IS NULL THEN
-           RAISE 'cette carte n''est pas la votre';
-         END IF;
-         IF retrait(_id_personne, _id_compte, _id_banque, montant) THEN 
+         IF retrait(infos.id_personne, infos.id_compte, infos.id_banque, montant) THEN 
            ALTER TABLE carte_credit DISABLE TRIGGER t_interdit_credit;
            UPDATE carte_credit SET revolving = revolving+montant;
            ALTER TABLE carte_credit ENABLE TRIGGER t_interdit_credit;
@@ -150,6 +154,8 @@ CREATE OR REPLACE FUNCTION compte_to_revolving(_id_personne INTEGER, _id_carte I
        END;
 $$ LANGUAGE 'plpgsql';
 
+
+
 -- ajoute du crédit à la carte par espèce
 CREATE OR REPLACE FUNCTION ajoute_revolving(_id_personne INTEGER, _id_carte INTEGER, montant REAL) RETURNS VOID AS $$
        DECLARE
@@ -160,8 +166,8 @@ CREATE OR REPLACE FUNCTION ajoute_revolving(_id_personne INTEGER, _id_carte INTE
          IF montant <= 0 THEN
             RAISE 'pour faire un retrait, utiliser la fonction retrait_revolving';
          END IF;
-         SELECT DISTINCT id_compte_personne INTO id_c FROM compte_personne WHERE id_personne = _id_personne;
-         SELECT * INTO card FROM carte_credit WHERE id_carte = _id_carte AND id_compte_personne = _id_personne;
+         SELECT DISTINCT id_compte_personne INTO id_c FROM compte_personne NATURAL JOIN compte WHERE id_personne = _id_personne;
+         SELECT * INTO card FROM carte_credit WHERE id_carte = _id_carte AND id_compte_personne = _id_c;
          IF card IS NULL THEN
            RAISE 'cette carte n''est pas la votre';
          END IF;

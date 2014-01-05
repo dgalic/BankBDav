@@ -15,7 +15,7 @@ DROP TYPE type_paiement;
 
 -- Creation de type
 CREATE TYPE type_compte AS ENUM ('AND','OR');
-CREATE TYPE type_paiement AS ENUM ('espece','cheque','carte','virement');
+CREATE TYPE type_paiement AS ENUM ('especes','cheque','carte','virement');
 
 -- Creation des tables
 CREATE TABLE personne (
@@ -39,7 +39,7 @@ CREATE TABLE banque_reference (
     agios REAL NOT NULL,
     atom_banque REAL NOT NULL,
     hebdo_banque REAL NOT NULL,
-    anti_decouvert BOOL NOT NULL,
+    anti_decouvert BOOLEAN NOT NULL,
     portee VARCHAR(10) NOT NULL,
     cout REAL NOT NULL,
     atom_autre REAL,

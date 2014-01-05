@@ -240,7 +240,7 @@ BEGIN
     END IF;
     
     --TODO vérifier si la id-> à vraiment un chéquier
-    IF  moyen_paiement = 'chéque' THEN
+    IF  moyen_paiement = 'cheque' THEN
         RAISE NOTICE 'Le depot par chéque n est pas possible';
         RETURN false;
     END IF;
@@ -280,11 +280,11 @@ CREATE OR REPLACE FUNCTION retrait(_id_client INTEGER, _id_compte INTEGER, _id_b
            RAISE 'Ce compte n''est pas le votre';
          END IF;
          SELECT * INTO _c FROM compte WHERE id_compte = _id_compte;
-         IF _c.depassement OR _c.solde >= _c.montant OR _c.montant-_c.solde <= _c.decouvert_autorise THEN
-           UPDATE compte SET solde = solde - montant WHERE id_compte = _id_compte;
+         IF _c.depassement OR _c.solde_compte >= montant OR montant-_c.solde_compte <= _c.decouvert_autorise THEN
+           UPDATE compte SET solde_compte = solde_compte - montant WHERE id_compte = _id_compte;
            RETURN TRUE;
          END IF;
-         RAISE 'Impossible de retirer autant d''argent';
+         RAISE 'Impossible de retirer autant d''argent : il y a % + % de découvert sans dépassement autorisé. Et vous voulez %', _c.solde_compte, _c.decouvert_autorise, montant;
          RETURN FALSE;
        END;
 $$ LANGUAGE 'plpgsql';

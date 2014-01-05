@@ -125,3 +125,28 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
+
+CREATE OR REPLACE FUNCTION to_compte_personne(client_id INTEGER, compte_id INTEGER, banque_id INTEGER DEFAULT NULL)
+RETURNS INTEGER AS $$
+        DECLARE
+          id INTEGER DEFAULT NULL;
+        BEGIN
+          IF banque_id IS NULL THEN
+            SELECT DISTINCT id_compte_personne INTO id FROM compte_personne WHERE id_compte = compte_id AND id_personne = client_id;
+            RETURN id;
+          END IF;
+          SELECT id_compte_personne INTO id FROM compte_personne WHERE id_compte = compte_id AND id_banque = banque_id AND id_personne = client_id;
+          RETURN id;
+        END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION from_compte_personne(id INTEGER)
+RETURNS RECORD AS $$
+        DECLARE
+          res RECORD;
+        BEGIN
+          SELECT id_personne, id_banque, id_compte INTO res FROM compte_personne WHERE id_compte_personne = id;
+          RETURN res;
+        END;
+$$ LANGUAGE 'plpgsql';
+
