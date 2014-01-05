@@ -103,3 +103,15 @@ Déposons un peu d’espèces :
 depot(3, 300, ‘especes’);
 Retirons-en :
 retrait(3, 100, ‘especes’);
+
+essayons un virement, au compte 4, qui appartient à TOM Cruise : 
+consultation_solde(‘Cruise’, TOM’);
+virement_unitaire(3, 4, montant, cout voulu);
+consultation_solde(‘Cruise’, TOM’);
+
+Un virement périodique ?
+virement_periodique(3, 4, 100, 7, 6, 2, NULL);
+pour un virement de 100 tous les 6 mois, le cout initial étant 7 et le cout périodique étant 2, à compte d’aujourd’hui.
+note : l’intervalle doit être 1, 3, 6 ou 12.
+
+

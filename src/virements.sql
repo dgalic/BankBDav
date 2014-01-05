@@ -1,5 +1,5 @@
 DROP TABLE virement CASCADE;
-CREATE TYPE interval_virement AS ENUM ('mensuel','trimestriel','semestriel','annuel'); 
+--CREATE TYPE interval_virement AS ENUM ('mensuel','trimestriel','semestriel','annuel'); 
 
 
 CREATE TABLE virement (
@@ -9,8 +9,9 @@ CREATE TABLE virement (
     montant REAL NOT NULL,
     cout_initial REAL NOT NULL,
     date_virement INTEGER NOT NULL,
-    interval interval_virement,
-    cout_periodique REAL
+    intervalle INTEGER,
+    cout_periodique REAL,
+     CHECK( intervalle IN(1,3,6,13) )
 );
 
 CREATE OR REPLACE FUNCTION virement_unitaire(id_src INTEGER, id_dest INTEGER, mont REAL, cout REAL DEFAULT 0) RETURNS VOID AS $$
@@ -23,9 +24,10 @@ CREATE OR REPLACE FUNCTION virement_unitaire(id_src INTEGER, id_dest INTEGER, mo
 	IF id_src = id_dest THEN
 	cout := 0;
 	END IF;	
+       	IF retrait(id_src, mont + cout, 'virement') THEN 
 	INSERT INTO virement(id_debiteur, id_crediteur, montant, cout_initial, date_virement) VALUES(id_src, id_dest, mont, cout, today);
-	retrait(id_src, montant + cout);   
-	depot(id_dest, montant);
+	PERFORM depot(id_dest, mont, 'virement');
+        END IF;
        END;
 $$ LANGUAGE 'plpgsql';
 
@@ -39,7 +41,8 @@ CREATE OR REPLACE FUNCTION virement_periodique(id_src INTEGER, id_dest INTEGER, 
 	IF id_src = id_dest THEN
 	cout_i := 0;
 	END IF;
-       	INSERT INTO virement(id_debiteur, id_crediteur, montant, cout_initial, date_virement, intervalle, cout_periodique) VALUES(id_src, id_dest, montant, cout_i, today, inter, cout_p);
-	retrait(id_src, cout_i);   
+	IF retrait(id_src, cout_i, 'virement') THEN
+           INSERT INTO virement(id_debiteur, id_crediteur, montant, cout_initial, date_virement, intervalle, cout_periodique) VALUES(id_src, id_dest, montant, cout_i, date, inter, cout_p);
+        END IF;
        END;
 $$ LANGUAGE 'plpgsql';
