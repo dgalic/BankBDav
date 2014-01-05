@@ -40,7 +40,6 @@ CREATE OR REPLACE FUNCTION virement_periodique(id_src INTEGER, id_dest INTEGER, 
 	cout_i := 0;
 	END IF;
        	INSERT INTO virement(id_debiteur, id_crediteur, montant, cout_initial, date_virement, intervalle, cout_periodique) VALUES(id_src, id_dest, montant, cout_i, today, inter, cout_p);
-	retrait(id_src, montant + cout_i);   
-	depot(id_dest, montant);       
+	retrait(id_src, cout_i);   
        END;
 $$ LANGUAGE 'plpgsql';

@@ -270,3 +270,21 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
+
+-- retire l'argent d'un compte, en vérifiant les affaires de découvert
+CREATE OR REPLACE FUNCTION retrait(_id_client INTEGER, _id_compte INTEGER, _id_banque INTEGER, montant REAL) RETURNS BOOLEAN AS $$
+       DECLARE
+         _c compte%ROWTYPE;
+       BEGIN
+         IF NOT is_compte_personne(_id_client, _id_compte, _id_banque) THEN
+           RAISE 'Ce compte n''est pas le votre';
+         END IF;
+         SELECT * INTO _c FROM compte WHERE id_compte = _id_compte;
+         IF _c.depassement OR _c.solde >= _c.montant OR _c.montant-_c.solde <= _c.decouvert_autorise THEN
+           UPDATE compte SET solde = solde - montant WHERE id_compte = _id_compte;
+           RETURN TRUE;
+         END IF;
+         RAISE 'Impossible de retirer autant d''argent';
+         RETURN FALSE;
+       END;
+$$ LANGUAGE 'plpgsql';
