@@ -38,7 +38,7 @@ CREATE TABLE distributeur (
 );
 
 CREATE TABLE compte (
-    id_compte SERIAL UNIQUE,
+    id_compte INTEGER,
     solde_compte REAL DEFAULT 0,
     seuil_remuneration REAL NOT NULL,
     periode_remuneration INTEGER NOT NULL,
