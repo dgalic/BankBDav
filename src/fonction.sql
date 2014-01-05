@@ -150,3 +150,42 @@ RETURNS RECORD AS $$
         END;
 $$ LANGUAGE 'plpgsql';
 
+-- test si une banque existe
+CREATE OR REPLACE FUNCTION obtenir_chequier(id_client_compte INTEGER)
+RETURNS BOOLEAN as $$
+DECLARE
+    client_compte INTEGER;
+    client_banque INTEGER;
+    info_chequier BOOLEAN;
+BEGIN
+    SELECT id_compte, id_banque
+        INTO client_compte, client_banque
+        FROM compte_personne
+        WHERE id_compte_personne = id_client_compte;
+
+    IF NOT FOUND THEN
+        RAISE NOTICE 'L identifiant % n existe pas', id_src;
+        RETURN false;
+    END IF;
+
+    SELECT chequier
+        INTO info_chequier
+        FROM compte
+        WHERE id_compte = client_compte
+        AND id_banque = client_banque;
+
+    IF info_chequier THEN  
+        RAISE NOTICE 'Le compte % possède déjà le droit d avoir un chéquier', client_compte;
+        RETURN false;
+   END IF; 
+
+
+    UPDATE compte 
+        SET chequier = TRUE
+        WHERE id_compte = retrait_compte
+        AND id_banque = retrait_banque;
+END;
+$$ LANGUAGE 'plpgsql';
+---------------------
+
+

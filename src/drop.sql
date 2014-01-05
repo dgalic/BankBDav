@@ -40,6 +40,7 @@ DROP FUNCTION consulte_solde(id_compte INTEGER, id_banque INTEGER);
 DROP FUNCTION is_compte_personne(client_id INTEGER, compte_id INTEGER, banque_id INTEGER);
 DROP FUNCTION to_compte_personne(client_id INTEGER, compte_id INTEGER, banque_id INTEGER);
 DROP FUNCTION from_compte_personne(id INTEGER);
+DROP FUNCTION obtenir_chequier(id_client_compte INTEGER);
 
 
 -- Nettoyage de la base de donnees
