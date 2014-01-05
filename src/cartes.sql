@@ -128,7 +128,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 -- ajoute du crédit à la carte tiré depuis le compte lié
-CREATE OR REPLACE FUNCTION compte_to_revolving(_id_personne INTEGER, _id_carte INTEGER,  montant REAL) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION ajoute_revolving(_id_personne INTEGER, _id_carte INTEGER,  montant REAL) RETURNS VOID AS $$
        DECLARE
          nv_montant REAL;
          infos RECORD;
@@ -144,37 +144,14 @@ CREATE OR REPLACE FUNCTION compte_to_revolving(_id_personne INTEGER, _id_carte I
          END IF;
          IF retrait(infos.id_personne, infos.id_compte, infos.id_banque, montant) THEN 
            ALTER TABLE carte_credit DISABLE TRIGGER t_interdit_credit;
-           UPDATE carte_credit SET revolving = revolving+montant;
+           UPDATE carte_credit SET revolving = revolving+montant WHERE id_carte = _id_carte;
            ALTER TABLE carte_credit ENABLE TRIGGER t_interdit_credit;
            SELECT revolving INTO nv_montant FROM carte_credit WHERE id_carte = _id_carte;
-           RAISE 'nouveau crédit de la carte n°% : %', _id_carte, nv_montant;
+           RAISE NOTICE 'nouveau crédit de la carte n°% : %', _id_carte, nv_montant;
+           SELECT solde_compte INTO nv_montant FROM compte WHERE id_compte = infos.id_compte;
+           RAISE NOTICE 'nouveau solde du compte n°% : %', infos.id_compte, nv_montant;
          ELSE
            RAISE 'vous ne pouvez pas retirer autant d''argent de ce compte';
          END IF;
-       END;
-$$ LANGUAGE 'plpgsql';
-
-
-
--- ajoute du crédit à la carte par espèce
-CREATE OR REPLACE FUNCTION ajoute_revolving(_id_personne INTEGER, _id_carte INTEGER, montant REAL) RETURNS VOID AS $$
-       DECLARE
-         id_c INTEGER;
-         card carte_credit%ROWTYPE;
-         nv_montant REAL;
-       BEGIN
-         IF montant <= 0 THEN
-            RAISE 'pour faire un retrait, utiliser la fonction retrait_revolving';
-         END IF;
-         SELECT DISTINCT id_compte_personne INTO id_c FROM compte_personne NATURAL JOIN compte WHERE id_personne = _id_personne;
-         SELECT * INTO card FROM carte_credit WHERE id_carte = _id_carte AND id_compte_personne = _id_c;
-         IF card IS NULL THEN
-           RAISE 'cette carte n''est pas la votre';
-         END IF;
-         ALTER TABLE carte_credit DISABLE TRIGGER t_interdit_credit;
-         UPDATE carte_credit SET revolving = revolving+montant;
-         ALTER TABLE carte_credit ENABLE TRIGGER t_interdit_credit;
-         SELECT revolving INTO nv_montant FROM carte_credit WHERE id_carte = _id_carte;
-         RAISE 'nouveau crédit de la carte n°% : %', _id_carte, nv_montant;
        END;
 $$ LANGUAGE 'plpgsql';
