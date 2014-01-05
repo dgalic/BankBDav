@@ -19,7 +19,7 @@ CREATE TYPE type_paiement AS ENUM ('especes','cheque','carte','virement');
 
 -- Creation des tables
 CREATE TABLE personne (
-    id_personne SERIAL PRIMARY KEY,
+    id_personne SERIAL UNIQUE PRIMARY KEY,
     nom_personne TEXT NOT NULL,
     prenom_personne TEXT NOT NULL
 );
@@ -53,7 +53,7 @@ CREATE TABLE distributeur (
 );
 
 CREATE TABLE compte (
-    id_compte INTEGER,
+    id_compte SERIAL UNIQUE,
     solde_compte REAL DEFAULT 0,
     seuil_remuneration REAL NOT NULL,
     periode_remuneration INTEGER NOT NULL,
