@@ -74,7 +74,10 @@ CREATE OR REPLACE FUNCTION plan_virements() RETURNS VOID AS $$
            IF(rec.date_prochain = today ) THEN
              -- effectue un virement
              SELECT * INTO vir FROM virement WHERE id_virement = rec.id_virement;
-             PERFORM virement_unitaire(vir.id_debiteur, vir.id_crediteur, vir.montant, vir.cout_periodique);
+             IF retrait(vir.id_debiteur, vir.montant + vir.cout_periodique, 'virement') THEN 
+	       PERFORM depot(vir.id_crediteur, vir.montant, 'virement');
+             END IF;
+             --PERFORM virement_unitaire(vir.id_debiteur, vir.id_crediteur, vir.montant, vir.cout_periodique);
              UPDATE plan_virements SET date_prochain = 30*vir.intervalle+today;
            END IF;
          END LOOP;

@@ -36,7 +36,9 @@ pour les virements :
 -à chaque fois qu'un virement périodique est fait, il faut vérifier le découvert. si c'est interdit, on ne le fait pas, et on ne l'ajoute pas dans l'historique. 
 
 
-
+Le temps : 
+La table temps fait office de calendrier. c’est simplement un entier qu’on incrémente chaque jour. Toute modification manuelle est interdite et déclenche un trigger d’avertissement. La bonne méthode pour modifier le temps est d‘utiliser la fonction passe_jours(n) pour faire passer n jours.
+Cette fonction déclenche les vérifications des évènements temporels, tels que plan_virements (qui vérifie si le jour courant, on doit effectuer des virements périodiques). 
 
 
 IV - Mode d’emploi
