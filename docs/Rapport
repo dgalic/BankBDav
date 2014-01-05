@@ -1,0 +1,70 @@
+Bases de données avancées  : 
+
+
+rapport de projet par David Galichet et Nicolas Cailloux
+
+
+I - Diagramme
+
+
+
+II - Schéma relationnel
+
+
+
+III - Règles de gestion
+
+
+﻿Chaque jour, on doit vérifier : 
+-si un virement doit être fait,
+ -si un paiement différé doit être débité,
+ -si il est temps de payer sa cotisation de carte de paiement,
+ -si on rejoint une nouvelle semaine, les montants hebdomadaires sont remis à 0,
+ -si il est temps de rémunérer le compte d'un client
+ -si ça fait 5 ans qu'un client est interdit bancaire : on lève l'interdit
+ -si quelqu'un est a découvert, on retire les indemnités journalières.
+
+-﻿on doit pouvoir négocier avec son banquier des modifications du compte.
+-on doit pouvoir commander des cartes/chéquiers, en vérifiant les interdictions bancaires. 
+-on doit pouvoir déposer de l'argent sur un compte : cela peut lever un interdit bancaire (si il n'est interdit dans aucune autre banque).
+-on doit pouvoir retirer de l'argent, via une carte de retrait : vérifier les montants, soldes et découverts
+-on doit pouvoir faire des chèques.
+-une banque peut vouloir modifier ses paramètres par défaut.
+
+pour les virements : 
+﻿-on doit aussi vérifier que (solde+decouvert autorisé) > (montant+cout_initial)
+-à chaque fois qu'un virement périodique est fait, il faut vérifier le découvert. si c'est interdit, on ne le fait pas, et on ne l'ajoute pas dans l'historique. 
+
+
+
+
+
+IV - Mode d’emploi
+
+
+Il faut commencer par créer des banques : 
+
+Une banque n’est rien sans client : 
+
+Pour créer une compte, utiliser :
+
+On dépot de l’argent dessus avec la fonction :
+
+ou, dans le cas de chèque : 
+
+De même, le retrait se fait avec : 
+
+On peut consulter le solde d’un compte avec : 
+
+Pour savoir si quelqu’un est interdit bancaire : 
+
+La liste des opérations est donnée par : 
+
+On peut fermer un compte dont le solde est 0 avec : 
+
+On fait une virement unitaire entre deux comptes avec :
+
+Les virements périodiques, eux, sont gérés par : 
+
+Pour faire passer un jour, utiliser la fonction : 
+passe_jours(n integer) qui fait passer n jours.
