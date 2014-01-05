@@ -1,18 +1,3 @@
--- Nettoyage de la base de donnees
-DROP TABLE interdit_bancaire;
-DROP TABLE historique CASCADE;
-DROP TABLE compte_personne CASCADE;
-DROP TABLE compte CASCADE;
-DROP TABLE distributeur CASCADE;
-DROP TABLE personne CASCADE;
-DROP TABLE banque_reference CASCADE;
-DROP TABLE banque CASCADE;
-DROP TABLE temps CASCADE;
-
--- Creation de type
-DROP TYPE type_compte;
-DROP TYPE type_paiement;
-
 -- Creation de type
 CREATE TYPE type_compte AS ENUM ('AND','OR');
 CREATE TYPE type_paiement AS ENUM ('especes','cheque','carte','virement');
