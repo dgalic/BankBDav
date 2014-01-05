@@ -40,17 +40,18 @@ CREATE OR REPLACE FUNCTION t_temps() RETURNS TRIGGER AS $$
        DECLARE
 
        BEGIN
-         RAISE NOTICE 'interdit de modifier le temps sans passer par la fonction passe_jours';
-         RETURN OLD;
+         RAISE 'interdit de modifier le temps sans passer par la fonction passe_jours';
        END;
 $$ LANGUAGE 'plpgsql';
 
 
 DROP TRIGGER IF EXISTS t_temps ON temps;
+-- on initialise le temps tant que le trigger n'est pas mis en place
 DELETE FROM temps;
 INSERT INTO temps VALUES(1);
+
 CREATE TRIGGER t_temps BEFORE INSERT OR UPDATE OR DELETE
 ON temps
-FOR EACH ROW
+FOR EACH STATEMENT
 EXECUTE PROCEDURE t_temps();
 ----------------------------

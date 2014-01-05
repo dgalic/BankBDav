@@ -4,7 +4,7 @@ DROP TABLE carte_credit CASCADE;
 DROP TABLE carte CASCADE;
 
 CREATE TABLE carte (
-    id_carte SERIAL CHECK ( id_carte > 0),
+    id_carte SERIAL,
     id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne),
     UNIQUE(id_carte)
 );
@@ -15,78 +15,74 @@ CREATE TABLE carte_retrait (
     montant_atomique_autre REAL,
     montant_hebdomadaire_banque REAL NOT NULL, 
     montant_hebdomadaire_autre REAL,
-    anti_decouvert BOOLEAN NOT NULL
+    anti_decouvert BOOLEAN NOT NULL,
+    id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne)
 ) INHERITS (carte);
 
 CREATE TABLE carte_paiement (
     portee varchar NOT NULL,
     debit_differe BOOLEAN NOT NULL,
     cout_annuel REAL NOT NULL,
-    prestige varchar(20)
+    prestige varchar(20),
+    id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne)
 ) INHERITS (carte);
 
 CREATE TABLE carte_credit (
-    revolving REAL check (revolving >= 0 ) NOT NULL 
+    revolving REAL check (revolving >= 0 ) NOT NULL,
+    id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne)
 ) INHERITS (carte);
 
 -----------------------------------------------------
--- les trois triggers suivant servent à garantir la validité des id
--- même à travers l'héritage (bancal en pgsql).
-----------------------------------------------------
-CREATE OR REPLACE FUNCTION t_insert_paiement() RETURNS TRIGGER AS $$
+-- 4 triggers pour empêcher la modification sans passer par les fonctions.
+-----------------------------------------------------
+
+CREATE OR REPLACE FUNCTION t_interdit_carte() RETURNS TRIGGER AS $$
        DECLARE
-         id INTEGER;
-         line record;
        BEGIN
-         SELECT id_carte INTO id FROM carte ORDER BY id_carte DESC LIMIT 1;
-         id := id + 1;
-         UPDATE carte_paiement SET id_carte = id WHERE id_carte = NEW.id_carte;
-         --INSERT INTO carte_paiement VALUES(id, NEW.id_compte_personne, NEW.portee, NEW.debit_differe, NEW.cout_annuel, NEW.prestige);
-         RETURN NEW;
-       END;
+            RAISE  'Vous ne pouvez pas agir sur les cartes comme ça !';                END;
 $$ LANGUAGE 'plpgsql';
 
-CREATE TRIGGER t_insert_paiement AFTER INSERT
+CREATE TRIGGER t_interdit_carte BEFORE INSERT OR UPDATE OR DELETE
+ON carte
+FOR EACH ROW
+EXECUTE PROCEDURE t_interdit_carte();
+
+----------------------------------------------------
+
+CREATE TRIGGER t_interdit_paiement AFTER INSERT
 ON carte_paiement
 FOR EACH ROW
-EXECUTE PROCEDURE t_insert_paiement();
+EXECUTE PROCEDURE t_interdit_carte();
 
 ------------------------------------------------
 
-CREATE OR REPLACE FUNCTION t_insert_credit() RETURNS TRIGGER AS $$
-       DECLARE
-         id INTEGER;
-         line record;
-       BEGIN
-         SELECT id_carte INTO id FROM carte ORDER BY id_carte DESC LIMIT 1;
-         id := id + 1;
-         UPDATE carte_credit SET id_carte = id WHERE id_carte = NEW.id_carte;
-         --INSERT INTO carte_paiement VALUES(id, NEW.id_compte_personne, NEW.portee, NEW.debit_differe, NEW.cout_annuel, NEW.prestige);
-         RETURN NEW;
-       END;
-$$ LANGUAGE 'plpgsql';
-
-CREATE TRIGGER t_insert_credit AFTER INSERT
+CREATE TRIGGER t_interdit_credit AFTER INSERT
 ON carte_credit
 FOR EACH ROW
-EXECUTE PROCEDURE t_insert_credit();
+EXECUTE PROCEDURE t_interdit_carte();
 
 ------------------------------------------------
 
-CREATE OR REPLACE FUNCTION t_insert_retrait() RETURNS TRIGGER AS $$
+CREATE TRIGGER t_interdit_retrait AFTER INSERT
+ON carte_retrait
+FOR EACH ROW
+EXECUTE PROCEDURE t_interdit_carte();
+
+
+---------------------------------------------------------
+
+-- fonctions de commande de carte
+
+---------------------------------------------------------
+
+-- renvoie le prochain ID valide. à utiliser pour assurer la validité de l'héritage
+CREATE OR REPLACE FUNCTION id_carte_suivant() RETURNS INTEGER AS $$
        DECLARE
-         id INTEGER;
-         line record;
+         id INTEGER DEFAULT 0;
        BEGIN
          SELECT id_carte INTO id FROM carte ORDER BY id_carte DESC LIMIT 1;
          id := id + 1;
-         UPDATE carte_retrait SET id_carte = id WHERE id_carte = NEW.id_carte;
-         --INSERT INTO carte_retrait VALUES(id, NEW.id_compte_personne, NEW.portee, NEW.debit_differe, NEW.cout_annuel, NEW.prestige);
-         RETURN NEW;
+         RETURN id;
        END;
 $$ LANGUAGE 'plpgsql';
 
-CREATE TRIGGER t_insert_retrait AFTER INSERT
-ON carte_retrait
-FOR EACH ROW
-EXECUTE PROCEDURE t_insert_retrait();
