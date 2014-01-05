@@ -12,7 +12,9 @@ DROP FUNCTION fermeture_compte(nom_client TEXT, prenom_client TEXT, client_banqu
 DROP FUNCTION consultation_solde(nom TEXT, prenom text);
 DROP FUNCTION consultation_historique(id_client_compte INTEGER);
 DROP FUNCTION depot (id_client_compte INTEGER, montant_depot REAL, moyen_paiement type_paiement);
-DROP FUNCTION retrait(_id_client INTEGER, _id_compte INTEGER, _id_banque INTEGER, montant REAL);
+DROP FUNCTION retrait(id_client_compte INTEGER, montant_retrait REAL, moyen_paiement type_paiement);
+DROP FUNCTION depot_cheque (id_dest INTEGER, montant_depot REAL, id_src INTEGER);
+
 -- Nettoyage des fonctions du fichier fonction.sql
 DROP FUNCTION list_personne();
 DROP FUNCTION list_banque();
@@ -20,7 +22,7 @@ DROP FUNCTION is_personne(nom TEXT, prenom text);
 DROP FUNCTION is_banque(nom text);
 DROP FUNCTION is_interdit_bancaire(client int);
 DROP FUNCTION creation_banque
-(nom_b VARCHAR(25),
+(nom_b TEXT,
 seuil_rem REAL,
 periode_rem INTEGER,
 taux_rem REAL,
@@ -37,7 +39,6 @@ hebdo_autre INTEGER );
 DROP FUNCTION consulte_solde(id_compte INTEGER, id_banque INTEGER);
 DROP FUNCTION is_compte_personne(client_id INTEGER, compte_id INTEGER, banque_id INTEGER);
 DROP FUNCTION to_compte_personne(client_id INTEGER, compte_id INTEGER, banque_id INTEGER);
-DROP FUNCTION from_compte_personne(id INTEGER);
 DROP FUNCTION from_compte_personne(id INTEGER);
 
 
