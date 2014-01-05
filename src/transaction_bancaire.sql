@@ -88,7 +88,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION fermeture_compte(client_id INTEGER, banque_id INTEGER ,compte_id INTEGER)
 RETURNS BOOLEAN as $$
 DECLARE
-   compte_t type_compte;
+   compte_t compte%ROWTYPE;
 BEGIN
     IF NOT is_compte_personne(client_id,compte_id,banque_id) THEN
        RAISE NOTICE 'Ce compte ne vous appartiernt pas';
@@ -104,7 +104,7 @@ BEGIN
     --TODO si carte implementer supprimer les cartes jointes au compte
     --TODO supprimer l'historique du compte
 
-    SELECT compte INTO compte_t
+    SELECT * INTO compte_t
     FROM compte
     WHERE id_compte = compte_id
     AND id_banque = banque_id;
