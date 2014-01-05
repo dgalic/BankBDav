@@ -28,6 +28,8 @@ CREATE OR REPLACE FUNCTION passe_jours(n INTEGER DEFAULT 1) RETURNS VOID AS $$
            it := it+1;
            -- insérer ici les choses à vérifier après une certaine période
 
+           
+
            -- fin des vérifications relatives au temps
          END LOOP;
          ALTER TABLE temps ENABLE TRIGGER t_temps;

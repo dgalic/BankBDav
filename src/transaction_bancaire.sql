@@ -287,7 +287,7 @@ BEGIN
          
     IF _c.depassement = TRUE 
         OR _c.solde_compte >= montant_retrait 
-        OR montant-_c.solde_compte <= _c.decouvert_autorise THEN
+        OR montant_retrait-_c.solde_compte <= _c.decouvert_autorise THEN
             
             jour_actuel = aujourdhui();
             
@@ -297,8 +297,8 @@ BEGIN
                 AND id_banque = retrait_banque;
             
             retrait_negatif = 0 - montant_retrait;
-            INSERT INTO historique (jour, id_compte_personne, paiement, retrait_negatif) 
-                VALUES (jour_actuel, id_client_compte, moyen_paiement, montant_depot);
+            INSERT INTO historique (jour, id_compte_personne, paiement, montant) 
+                VALUES (jour_actuel, id_client_compte, moyen_paiement, montant_retrait);
            
            RETURN TRUE;
     END IF;

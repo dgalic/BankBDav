@@ -15,7 +15,7 @@ II - Schéma relationnel
 III - Règles de gestion
 
 
-﻿Chaque jour, on doit vérifier : 
+Chaque jour, on doit vérifier : 
 -si un virement doit être fait,
  -si un paiement différé doit être débité,
  -si il est temps de payer sa cotisation de carte de paiement,
@@ -24,7 +24,7 @@ III - Règles de gestion
  -si ça fait 5 ans qu'un client est interdit bancaire : on lève l'interdit
  -si quelqu'un est a découvert, on retire les indemnités journalières.
 
--﻿on doit pouvoir négocier avec son banquier des modifications du compte.
+-on doit pouvoir négocier avec son banquier des modifications du compte.
 -on doit pouvoir commander des cartes/chéquiers, en vérifiant les interdictions bancaires. 
 -on doit pouvoir déposer de l'argent sur un compte : cela peut lever un interdit bancaire (si il n'est interdit dans aucune autre banque).
 -on doit pouvoir retirer de l'argent, via une carte de retrait : vérifier les montants, soldes et découverts
@@ -32,7 +32,7 @@ III - Règles de gestion
 -une banque peut vouloir modifier ses paramètres par défaut.
 
 pour les virements : 
-﻿-on doit aussi vérifier que (solde+decouvert autorisé) > (montant+cout_initial)
+-on doit aussi vérifier que (solde+decouvert autorisé) > (montant+cout_initial)
 -à chaque fois qu'un virement périodique est fait, il faut vérifier le découvert. si c'est interdit, on ne le fait pas, et on ne l'ajoute pas dans l'historique. 
 
 
@@ -42,29 +42,64 @@ pour les virements :
 IV - Mode d’emploi
 
 
-Il faut commencer par créer des banques : 
+-Il faut commencer par créer des banques : 
+creation banque(nom, liste des éléments par défaut);
+les éléments par défaut sont, à la suite : seuil_remunération, période_rémunération, taux_remuneration, decouvert_autorisé, taux_decouvert, agios, (carte) montant maximum par jour pour la banque, montante hebdomadaire maximum par banque, protection anti_decouvert, portee de la carte, cout de la carte de paiement, montant max par opération chez les autres banques, montant hebdomadaire max chez les autres banques.
 
-Une banque n’est rien sans client : 
+-Pour créer une compte, utiliser :
+ouverture_compte(Nom, Prenom, Banque);
+(la personne doit exister dans la table personne).
+-Quelques fonctions vous demandent de connaitre votre id_compte_personne, consultable avec : 
+to_compte_personne(id_client, id_compte, id_banque);
 
-Pour créer une compte, utiliser :
+-On dépot de l’argent dessus avec la fonction :
+depot(compte_personne, montant, moyen de paiement)
+avec moyen_de_paiement : ‘especes’ ou ‘cheque' ou ‘carte’.
+-ou, dans le cas de chèque, spécifiquement : 
+depot_cheque(compte_personne_crediteur, montant, compte_personne, debiteur).
 
-On dépot de l’argent dessus avec la fonction :
+-De même, le retrait se fait avec : 
+retrait(compte_personne, montant, type de retrait);
 
-ou, dans le cas de chèque : 
+-On peut consulter le solde d’un compte avec : 
+consultation_solde(nom, prenom);
 
-De même, le retrait se fait avec : 
+-Pour savoir si quelqu’un est interdit bancaire : 
+is_interdit_bancaire()
 
-On peut consulter le solde d’un compte avec : 
+-La liste des opérations est donnée par : 
 
-Pour savoir si quelqu’un est interdit bancaire : 
+-On peut fermer un compte dont le solde est 0 avec : 
 
-La liste des opérations est donnée par : 
+-On fait une virement unitaire entre deux comptes avec :
 
-On peut fermer un compte dont le solde est 0 avec : 
+-Les virements périodiques, eux, sont gérés par : 
 
-On fait une virement unitaire entre deux comptes avec :
-
-Les virements périodiques, eux, sont gérés par : 
-
-Pour faire passer un jour, utiliser la fonction : 
+-Pour faire passer un jour, utiliser la fonction : 
 passe_jours(n integer) qui fait passer n jours.
+
+-On peut commander une carte de credit liée à un compte : 
+carte_credit(client, banque, compte);
+-et ajouter de l’argent dessus, puisé dans le compte : 
+ajoute_revolving(client, carte, montant);
+
+V - Exemples
+
+Quelques tests déjà faits : 
+Le client 1 possède le compte 0 chez la banque 4. Le id_compte_personne lié est 3.
+De base, ce compte a un solde de 3000.
+
+Créez une carte de crédit : 
+carte_credit(1,4,0);
+Celà crée la carte n°1 liée au compte cité.
+Et ajoutez du solde dessus : 
+ajoute_revolving(1, 1, 200);
+Le crédit de la carte augmente, celui du compte diminue. 
+Tentez d’ajouter beaucoup d’argent : 
+ajoute_revolving(1,1, 99999);
+Constatez que c’est impossible car aucun découvert ou dépassement de découvert n’est autorisé.
+
+Déposons un peu d’espèces : 
+depot(3, 300, ‘especes’);
+Retirons-en :
+retrait(3, 100, ‘especes’);
