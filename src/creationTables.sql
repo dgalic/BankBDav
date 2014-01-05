@@ -11,7 +11,7 @@ CREATE TABLE personne (
 
 CREATE TABLE banque (
     id_banque SERIAL PRIMARY KEY,
-    nom_banque VARCHAR(25) NOT NULL,
+    nom_banque TEXT NOT NULL,
     nombre_compte INTEGER DEFAULT 0
 );
 

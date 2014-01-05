@@ -1,6 +1,6 @@
 -- list les personnes existante
 CREATE OR REPLACE FUNCTION list_personne()
-RETURNS TABLE(nom varchar(20), prenom varchar(20)) as $$
+RETURNS TABLE(nom TEXT, prenom TEXT) as $$
 DECLARE
     client record;
 BEGIN
@@ -16,7 +16,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- list les banques existante
 CREATE OR REPLACE FUNCTION list_banque()
-RETURNS TABLE(nom varchar(20)) as $$
+RETURNS TABLE(nom TEXT) as $$
 DECLARE
     banque record;
 BEGIN
@@ -82,7 +82,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- creation d'une banque avec valeur de reference pour le compte
 CREATE OR REPLACE FUNCTION creation_banque
-(nom_b VARCHAR(25), seuil_rem REAL, periode_rem INTEGER, taux_rem REAL, decouvert REAL, taux_dec REAL, agios REAL, atom_banque REAL DEFAULT 500, hebdo_banque REAL DEFAULT 2500, anti_dec BOOLEAN DEFAULT FALSE, portee VARCHAR(10) DEFAULT 'nationale', cout REAL DEFAULT 20, atom_autre REAL DEFAULT 200, hebdo_autre INTEGER DEFAULT 1000)
+(nom_b TEXT, seuil_rem REAL, periode_rem INTEGER, taux_rem REAL, decouvert REAL, taux_dec REAL, agios REAL, atom_banque REAL DEFAULT 500, hebdo_banque REAL DEFAULT 2500, anti_dec BOOLEAN DEFAULT FALSE, portee VARCHAR(10) DEFAULT 'nationale', cout REAL DEFAULT 20, atom_autre REAL DEFAULT 200, hebdo_autre INTEGER DEFAULT 1000)
 RETURNS BOOLEAN as $$
 DECLARE
    id_b int;
