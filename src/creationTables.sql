@@ -26,7 +26,7 @@ CREATE TABLE personne (
 
 CREATE TABLE banque (
     id_banque SERIAL PRIMARY KEY,
-    nom_banque TEXT NOT NULL,
+    nom_banque VARCHAR(25) NOT NULL,
     nombre_compte INTEGER DEFAULT 0
 );
 
@@ -40,7 +40,7 @@ CREATE TABLE banque_reference (
     atom_banque REAL NOT NULL,
     hebdo_banque REAL NOT NULL,
     anti_decouvert BOOL NOT NULL,
-    portee VARCHAR NOT NULL,
+    portee VARCHAR(10) NOT NULL,
     cout REAL NOT NULL,
     atom_autre REAL,
     hebdo_autre REAL,

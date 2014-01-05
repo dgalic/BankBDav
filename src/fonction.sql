@@ -82,7 +82,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- creation d'une banque avec valeur de reference pour le compte
 CREATE OR REPLACE FUNCTION creation_banque
-(nom_b TEXT, seuil_rem REAL, periode_rem INTEGER, taux_rem REAL, decouvert REAL, taux_dec REAL, agios real)
+(nom_b VARCHAR(25), seuil_rem REAL, periode_rem INTEGER, taux_rem REAL, decouvert REAL, taux_dec REAL, agios REAL, atom_banque REAL DEFAULT 500, hebdo_banque REAL DEFAULT 2500, anti_dec BOOLEAN DEFAULT FALSE, portee VARCHAR(10) DEFAULT 'nationale', cout REAL DEFAULT 20, atom_autre REAL DEFAULT 200, hebdo_autre INTEGER DEFAULT 1000)
 RETURNS BOOLEAN as $$
 DECLARE
    id_b int;
@@ -94,8 +94,8 @@ BEGIN
     INSERT INTO banque (nom_banque) VALUES (nom_b);
     SELECT id_banque INTO id_b FROM banque WHERE nom_banque = nom_b ;
     INSERT INTO banque_reference
-    (id_banque, seuil_remuneration, periode_remuneration, taux_remuneration, decouvert_autorise, taux_decouvert, agios) VALUES
-    (id_b, seuil_rem, periode_rem, taux_rem, decouvert, taux_dec, agios);
+    (id_banque, seuil_remuneration, periode_remuneration, taux_remuneration, decouvert_autorise, taux_decouvert, agios, atom_banque, hebdo_banque, anti_decouvert, portee, cout, atom_autre, hebdo_autre) VALUES
+    (id_b, seuil_rem, periode_rem, taux_rem, decouvert, taux_dec, agios, atom_banque, hebdo_banque, anti_dec, portee, cout, atom_autre, hebdo_autre);
     RETURN true;
 END;
 $$ LANGUAGE 'plpgsql';

@@ -4,11 +4,11 @@ INSERT INTO personne (nom_personne, prenom_personne) VALUES
 ('Galichet','David'),
 ('Cruise','TOM'),
 ('Pitt','Brad');
-
-select creation_banque('Bnp',0,0,0,0,0,0);
-select creation_banque('Lcl',0,0,0,0,0,0);
-select creation_banque('Cic',0,0,0,0,0,0);
-select creation_banque('Axa',0,0,0,0,0,0);
+ 
+select creation_banque('Bnp',0,0,0,0,0,0,200,100,FALSE,'nationale', 20, 100, 500);
+select creation_banque('Lcl',0,0,0,0,0,0,200,100,FALSE,'nationale', 20, 100, 500);
+select creation_banque('Cic',0,0,0,0,0,0,200,100,FALSE,'nationale', 20, 100, 500);
+select creation_banque('Axa',0,0,0,0,0,0,200,100,FALSE,'nationale', 20, 100, 500);
 
 select ouverture_compte('Galichet','David','Bnp');;
 select ouverture_compte('Galichet','David','Bnp');;
