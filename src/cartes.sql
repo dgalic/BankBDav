@@ -79,10 +79,43 @@ EXECUTE PROCEDURE t_interdit_carte();
 CREATE OR REPLACE FUNCTION id_carte_suivant() RETURNS INTEGER AS $$
        DECLARE
          id INTEGER DEFAULT 0;
-       BEGIN
+       BEGIN         
          SELECT id_carte INTO id FROM carte ORDER BY id_carte DESC LIMIT 1;
+         IF id IS NULL THEN
+           id := 0;
+         END IF;
          id := id + 1;
          RETURN id;
        END;
 $$ LANGUAGE 'plpgsql';
 
+
+CREATE OR REPLACE FUNCTION carte_retrait() RETURNS VOID AS $$
+       DECLARE
+
+       BEGIN
+       
+       END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION carte_paiement() RETURNS VOID AS $$
+       DECLARE
+
+       BEGIN
+       
+       END;
+$$ LANGUAGE 'plpgsql';
+
+
+CREATE OR REPLACE FUNCTION carte_credit(id_client INTEGER) RETURNS VOID AS $$
+       DECLARE
+        id INTEGER;
+       BEGIN
+        ALTER TABLE carte_credit DISABLE TRIGGER t_interdit_credit;
+        id := id_carte_suivant();
+        INSERT INTO carte_credit(id_carte, id_compte_personne, revolving) VALUES(id, id_client, 0);
+        RAISE NOTICE 'Le client % possède maintenant la carte de crédit n°%', id_client, id;
+        ALTER TABLE carte_credit ENABLE TRIGGER t_interdit_credit;
+       END;
+$$ LANGUAGE 'plpgsql';

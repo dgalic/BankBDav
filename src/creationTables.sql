@@ -1,7 +1,6 @@
 -- Nettoyage de la base de donnees
 DROP TABLE interdit_bancaire;
 DROP TABLE historique CASCADE;
-DROP TABLE virement CASCADE;
 DROP TABLE compte_personne CASCADE;
 DROP TABLE compte CASCADE;
 DROP TABLE distributeur CASCADE;
@@ -13,11 +12,9 @@ DROP TABLE temps CASCADE;
 -- Creation de type
 DROP TYPE type_compte;
 DROP TYPE type_paiement;
-DROP TYPE interval_virement;
 
 -- Creation de type
 CREATE TYPE type_compte AS ENUM ('AND','OR');
-CREATE TYPE interval_virement AS ENUM ('1','3','6','12'); 
 CREATE TYPE type_paiement AS ENUM ('espece','cheque','carte','virement');
 
 -- Creation des tables
@@ -40,6 +37,13 @@ CREATE TABLE banque_reference (
     decouvert_autorise REAL NOT NULL,
     taux_decouvert REAL NOT NULL,
     agios REAL NOT NULL,
+    atom_banque REAL NOT NULL,
+    hebdo_banque REAL NOT NULL,
+    anti_decouvert BOOL NOT NULL,
+    portee VARCHAR NOT NULL,
+    cout REAL NOT NULL,
+    atom_autre REAL,
+    hebdo_autre REAL,
     id_banque INTEGER REFERENCES banque(id_banque)
 );    
 
