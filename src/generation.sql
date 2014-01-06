@@ -6,12 +6,8 @@
 
 -- creation table virement avec contrainte de gestion
 \i cartes.sql
+\i virements.sql
 
 -- creation des fonctions
 \i fonction.sql
 \i transaction_bancaire.sql
-
-\i virements.sql
-
---insertion des données
-\i donnee.sql
