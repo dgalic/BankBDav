@@ -1,25 +1,3 @@
-DROP TABLE virement CASCADE;
-DROP TABLE plan_virements CASCADE;
---CREATE TYPE interval_virement AS ENUM ('mensuel','trimestriel','semestriel','annuel'); 
-
-
-CREATE TABLE virement (
-    id_virement SERIAL PRIMARY KEY,
-    id_debiteur INTEGER REFERENCES compte_personne(id_compte_personne),
-    id_crediteur INTEGER REFERENCES compte_personne(id_compte_personne),
-    montant REAL NOT NULL,
-    cout_initial REAL NOT NULL,
-    date_virement INTEGER NOT NULL,
-    intervalle INTEGER,
-    cout_periodique REAL,
-     CHECK( intervalle IN(0,1,3,6,13) )
-);
-
-CREATE TABLE plan_virements(
-       id_virement INTEGER REFERENCES virement,
-       date_prochain INTEGER
-);
-
 CREATE OR REPLACE FUNCTION virement_unitaire(id_src INTEGER, id_dest INTEGER, mont REAL, cout REAL DEFAULT 0) RETURNS VOID AS $$
        DECLARE
 	today INTEGER;
