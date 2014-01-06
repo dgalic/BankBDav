@@ -415,3 +415,42 @@ CREATE OR REPLACE FUNCTION check_decouverts() RETURNS VOID AS $$
        END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
+
+
+
+CREATE OR REPLACE FUNCTION check_liberations() RETURNS VOID AS $$
+       DECLARE
+         interdits CURSOR FOR (SELECT * FROM interdit_bancaire);
+         comptes REFCURSOR;
+         entry_i RECORD;
+         entry_c RECORD;
+         today INTEGER;
+         client INTEGER;
+         count_dec INTEGER;
+         nv_solde REAL;
+       BEGIN
+         OPEN interdits;
+         today := aujourdhui();
+         LOOP
+           FETCH FROM interdits INTO entry_i;
+           EXIT WHEN NOT FOUND;
+           --pour chaque personne interdite, on regarde si dans chacun de ses comptes elle est revenu en positif. dès qu'on trouve 1 compte à découvert, on passe.
+           count_dec := 0;
+           OPEN comptes FOR (SELECT * FROM compte NATURAL JOIN (SELECT * FROM compte_personne WHERE id_personne = entry_i.id_client AND id_banque = entry_i.id_banque) AS cp);
+           LOOP
+             FETCH FROM comptes INTO entry_c;
+             --on regarde tous les comptes de la banque, voir si ils sont encore à découvert ou non
+             EXIT WHEN NOT FOUND;
+             IF entry_c.solde_compte < 0 THEN
+               count_dec := count_dec+1;
+             END IF;
+           END LOOP;
+           IF count_dec > 0 THEN
+             UPDATE interdit_bancaire SET date_regularisation = today WHERE id_client = entry_i.id_client AND id_banque = entry_i.id_banque;
+           END IF;
+           CLOSE comptes;
+         END LOOP;
+         CLOSE interdits;       
+       END;
+$$ LANGUAGE 'plpgsql';
+---------------------

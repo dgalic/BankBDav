@@ -30,7 +30,7 @@ CREATE OR REPLACE FUNCTION passe_jours(n INTEGER DEFAULT 1) RETURNS VOID AS $$
            PERFORM plan_virements();
            PERFORM plan_remuneration();
            PERFORM check_decouverts();
-
+           PERFORM check_liberations();
            -- fin des vérifications relatives au temps
          END LOOP;
          ALTER TABLE temps ENABLE TRIGGER t_temps;
