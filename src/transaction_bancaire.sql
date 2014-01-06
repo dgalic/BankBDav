@@ -389,6 +389,7 @@ DECLARE
     entry RECORD;
     test RECORD;
     today INTEGER;
+    five_years INTEGER;
     client INTEGER;
     nv_solde REAL;
 BEGIN
@@ -398,7 +399,7 @@ BEGIN
         EXIT WHEN NOT FOUND;
         
         -- les éléments du curseur sont les clients à découvert
-        nv_solde := entry.solde_compte *(1 + entry.taux_decouvert);
+        nv_solde := entry.solde_compte * (1.0 + entry.taux_decouvert);
         UPDATE compte 
             SET solde_compte = nv_solde 
             WHERE id_compte = entry.id_compte 
@@ -406,7 +407,7 @@ BEGIN
         
         IF  entry.depassement_autorise THEN
              --dépassement de découvert autorisé : prise d'agios
-             nv_solde := entry.solde_compte - entry.agios;
+             nv_solde := (entry.solde_compte* (1.0 + entry.taux_decouvert) )- entry.agios;
              
              UPDATE compte 
                 SET solde_compte = nv_solde 
@@ -431,8 +432,10 @@ BEGIN
              
              IF test IS NULL THEN
                -- on va pas insérer plusieurs fois
-               INSERT INTO interdit_bancaire 
-                VALUES(entry.id_banque, client, 'dépassement de découvert', today, today+5*30*12);
+               five_years := today + 5*12*30;
+               RAISE NOTICE '% devient interdit bancaire jusqu''a %.', client, five_years;
+               INSERT INTO interdit_bancaire(id_banque, id_client, motif, date_debut, date_regularisation) 
+                VALUES(entry.id_banque, client, 'dépassement de découvert', today, five_years);
              END IF;
            END IF;
          END LOOP;
@@ -480,7 +483,7 @@ BEGIN
                 END IF;
             END LOOP;
            
-           IF count_dec > 0 THEN
+           IF count_dec <= 0 THEN
             UPDATE interdit_bancaire 
                 SET date_regularisation = today 
                 WHERE id_client = entry_i.id_client 

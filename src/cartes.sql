@@ -94,7 +94,7 @@ $$ LANGUAGE 'plpgsql';
 
 
 -- ajoute du crédit à la carte tiré depuis le compte lié
-CREATE OR REPLACE FUNCTION ajoute_revolving(_id_personne INTEGER, _id_carte INTEGER,  montant REAL) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION ajoute_revolving(_id_carte INTEGER,  montant REAL) RETURNS VOID AS $$
        DECLARE
          nv_montant REAL;
          infos RECORD;
@@ -105,16 +105,13 @@ CREATE OR REPLACE FUNCTION ajoute_revolving(_id_personne INTEGER, _id_carte INTE
          END IF;
           SELECT id_compte_personne INTO id_cp FROM carte WHERE id_carte = _id_carte;
          infos := from_compte_personne(id_cp);
-         IF infos IS NULL OR infos.id_personne != _id_personne THEN
-           RAISE 'cette carte n''est pas le votre', _id_compte;
-         END IF;
-         IF retrait(infos.id_personne, infos.id_compte, infos.id_banque, montant) THEN 
+         IF retrait(id_cp, montant, 'carte') THEN 
            ALTER TABLE carte_credit DISABLE TRIGGER t_interdit_credit;
            UPDATE carte_credit SET revolving = revolving+montant WHERE id_carte = _id_carte;
            ALTER TABLE carte_credit ENABLE TRIGGER t_interdit_credit;
            SELECT revolving INTO nv_montant FROM carte_credit WHERE id_carte = _id_carte;
            RAISE NOTICE 'nouveau crédit de la carte n°% : %', _id_carte, nv_montant;
-           SELECT solde_compte INTO nv_montant FROM compte WHERE id_compte = infos.id_compte;
+           SELECT solde_compte INTO nv_montant FROM compte WHERE id_compte = infos.id_compte AND id_banque = infos.id_banque;
            RAISE NOTICE 'nouveau solde du compte n°% : %', infos.id_compte, nv_montant;
          ELSE
            RAISE 'vous ne pouvez pas retirer autant d''argent de ce compte';

@@ -69,7 +69,7 @@ IV - Mode d’emploi
 
 pour utiliser nos fichier sur la base psql:
     - \i generation.sql : génère toutes les tables, fonctions et trigger
-    - \i donne.sql : ajoutent quelques données
+    - \i donnee.sql : ajoutent quelques données
     - \i drop.sql  : supprimes toutes les tables, fonctions et trigger proprement
 
 -Il faut commencer par créer des banques : 
@@ -124,7 +124,7 @@ ajoute_revolving(client, carte, montant);
 V - Exemples
 
 Quelques tests à faire : 
-Le client 1 possède le compte 0 chez la banque 4. Le id_compte_personne lié est 3.
+Le client 1 (Anais Terik) possède le compte 0 chez la banque 4 (Axa). Le id_compte_personne lié est 3.
 De base, ce compte a un solde de 3000.
 
 Créez une carte de crédit : 
@@ -132,27 +132,48 @@ Créez une carte de crédit :
 Celà crée la carte n°1 liée au compte cité.
 
 Et ajoutez du solde dessus : 
-    ajoute_revolving(1, 1, 200);
+    ajoute_revolving(1, 200);
 Le crédit de la carte augmente, celui du compte diminue. 
-Tentez d’ajouter beaucoup d’argent : 
-    ajoute_revolving(1,1, 99999);
-Constatez que c’est impossible car aucun découvert ou dépassement de découvert n’est autorisé.
 
-Déposons un peu d’espèces : 
-    depot(3, 300, ‘especes’);
+Tentons d’ajouter beaucoup d’argent : 
+    ajoute_revolving(1, 20000);
+
+Voyons où on en est : 
+consultation_solde(‘Terik’, ‘Anais’);
+Dans la banque Axa (d’id 4), sur le compte 0, la jeune femme est en négatif. Peut-être que ça ira mieux demain ?
+passe_jours(1);
+consultation_solde(‘Terik’, ‘Anais’);
+is_interdit_bancaire(1);
+Elle n’est pas interdit bancaire, mais on lui a soutiré de l’argent par rapport à hier. C’est parce que la banque Axa tolère les dépassements de découvert (en facturant, bien sûr, des agios, et un taux de découvert).
+
+
+Déposons “un peu” d’espèces : 
+    depot(3, 30000, ‘especes’);
 Retirons-en :
         retrait(3, 100, ‘especes’);
+consultation_solde(‘Terik’, ‘Anais’);
 
-Essayons un virement, au compte 4, qui appartient à TOM Cruise : 
-    consultation_solde(‘Cruise’, TOM’);
+Essayons un virement, au compte_client 4, qui appartient à Tom Cruise : 
+    consultation_solde(‘Cruise’, Tom’);
     virement_unitaire(3, 4, montant, cout voulu);
-    consultation_solde(‘Cruise’, TOM’);
+    consultation_solde(‘Cruise’, Tom’);
 
 Un virement périodique ?
-    virement_periodique(3, 4, 100, 7, 6, 2, NULL);
-
-pour un virement de 100 tous les 6 mois à compter de demain, le cout initial étant 7 et le cout périodique étant 2.
+    virement_periodique(3, 4, 1000, 7, 6, 2, NULL);
+pour un virement de 1000 tous les 6 mois à compter de demain, le cout initial étant 7 et le cout périodique étant 2.
 note : l’intervalle doit être 1, 3, 6 ou 12. 0 est accepté, et indique en fait un virement unique.
 
+Passons un long moment :     
+consultation_solde(‘Cruise’, Tom’);
+consultation_solde(‘Terik’, Anais’);
+passe_jours(190);    
+consultation_solde(‘Cruise’, Tom’);
+consultation_solde(‘Terik’, Anais’);
 
+Anais Terik possède aussi un compte à la BNP(1), qui ne tolère pas les découverts. On peut tester avec le compte 1.
+to_compte_personne(1,1,1)  --> 2
 
+retrait(2, 999, ‘especes’);
+passe_jours(1);   on laisse 1 jour à la personne pour régler ses problèmes.
+is_interdit_bancaire(1);
+Quel dommage d’être interdit bancaire.
