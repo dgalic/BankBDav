@@ -82,7 +82,8 @@ from_compte_personne(id_compte_personne) qui renvoie l’id_personne, l’id_ban
 virement_unitaire(compte_personne debiteur, compte_personne crediteur, montant)
 -Les virements périodiques, eux, sont gérés par : 
 virement_périodique(compte_personne debiteur, compte_personne crediteur, montant, cout_initial, intervalle, cout périodique, date);
-si date est NULL, c’est mis au jour courant, et intervalle doit être 1, 3, 6 ou 12. Si intervalle vaut 0, cela indique un virement unique.
+si date est NULL, c’est mis au jour courant, sinon ça dit dans combien de temps commencent les virements. comme tous nos mois font 30 jours, cela suffit pour avoir un virement au jour du mois près. 
+Et intervalle doit être 1, 3, 6 ou 12. Si intervalle vaut 0, cela indique un virement unique.
 
 -Pour faire passer un jour, utiliser la fonction : 
 passe_jours(n integer) qui fait passer n jours.

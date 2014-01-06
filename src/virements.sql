@@ -73,7 +73,7 @@ CREATE OR REPLACE FUNCTION plan_virements() RETURNS VOID AS $$
            EXIT WHEN NOT FOUND;
            IF(rec.date_prochain = today ) THEN
              -- effectue un virement
-             SELECT * INTO vir FROM virement WHERE id_virement = rec.id_virement;
+             SELECT * INTO vir FROM virement WHERE intervalle != 0 AND id_virement = rec.id_virement;
              IF retrait(vir.id_debiteur, vir.montant + vir.cout_periodique, 'virement') THEN 
 	       PERFORM depot(vir.id_crediteur, vir.montant, 'virement');
              END IF;
