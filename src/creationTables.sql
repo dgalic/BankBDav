@@ -32,11 +32,6 @@ CREATE TABLE banque_reference (
     id_banque INTEGER REFERENCES banque(id_banque)
 );    
 
-CREATE TABLE distributeur (
-    id_distributeur SERIAL PRIMARY KEY,
-    id_banque INTEGER REFERENCES banque(id_banque)
-);
-
 CREATE TABLE compte (
     id_compte INTEGER,
     solde_compte REAL DEFAULT 0,

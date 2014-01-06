@@ -72,7 +72,6 @@ DROP TABLE interdit_bancaire;
 DROP TABLE historique CASCADE;
 DROP TABLE compte_personne CASCADE;
 DROP TABLE compte CASCADE;
-DROP TABLE distributeur CASCADE;
 DROP TABLE personne CASCADE;
 DROP TABLE banque_reference CASCADE;
 DROP TABLE banque CASCADE;
