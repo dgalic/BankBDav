@@ -61,6 +61,23 @@ CREATE TABLE compte_personne (
     FOREIGN KEY (id_compte, id_banque) REFERENCES compte (id_compte, id_banque) 
 );
 
+CREATE TABLE virement (
+    id_virement SERIAL PRIMARY KEY,
+    id_debiteur INTEGER REFERENCES compte_personne(id_compte_personne),
+    id_crediteur INTEGER REFERENCES compte_personne(id_compte_personne),
+    montant REAL NOT NULL,
+    cout_initial REAL NOT NULL,
+    date_virement INTEGER NOT NULL,
+    intervalle INTEGER,
+    cout_periodique REAL,
+     CHECK( intervalle IN(0,1,3,6,13) )
+);
+
+CREATE TABLE plan_virements(
+       id_virement INTEGER REFERENCES virement,
+       date_prochain INTEGER
+);
+
 CREATE TABLE historique (
     jour INTEGER CHECK (jour > 0),
     id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne),
@@ -75,3 +92,38 @@ CREATE TABLE interdit_bancaire (
     date_debut INTEGER NOT NULL,
     date_regularisation INTEGER DEFAULT NULL
 );
+
+CREATE TABLE plan_remunerations(
+    id_cp INTEGER REFERENCES compte_personne(id_compte_personne),
+    date_prochain INTEGER
+);
+
+CREATE TABLE carte (
+    id_carte SERIAL,
+    id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne),
+    UNIQUE(id_carte)
+);
+
+CREATE TABLE carte_retrait (
+    portee varchar NOT NULL,
+    montant_atomique_banque REAL NOT NULL, 
+    montant_atomique_autre REAL,
+    montant_hebdomadaire_banque REAL NOT NULL, 
+    montant_hebdomadaire_autre REAL,
+    depassement_autorise BOOLEAN NOT NULL,
+    id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne)
+) INHERITS (carte);
+
+CREATE TABLE carte_paiement (
+    portee varchar NOT NULL,
+    debit_differe BOOLEAN NOT NULL,
+    cout_annuel REAL NOT NULL,
+    prestige varchar(20),
+    id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne)
+) INHERITS (carte);
+
+CREATE TABLE carte_credit (
+    revolving REAL check (revolving >= 0 ) NOT NULL,
+    id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne)
+) INHERITS (carte);
+
