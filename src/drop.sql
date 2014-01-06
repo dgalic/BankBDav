@@ -52,6 +52,12 @@ DROP TABLE distributeur CASCADE;
 DROP TABLE personne CASCADE;
 DROP TABLE banque_reference CASCADE;
 DROP TABLE banque CASCADE;
+DROP TABLE carte_retrait CASCADE;
+DROP TABLE carte_paiement CASCADE;
+DROP TABLE carte_credit CASCADE;
+DROP TABLE carte CASCADE;
+DROP TABLE plan_virements CASCADE;
+DROP TABLE virement CASCADE;
 
 -- Nettoyage des types
 DROP TYPE type_compte;
