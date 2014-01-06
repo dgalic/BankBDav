@@ -383,6 +383,7 @@ CREATE OR REPLACE FUNCTION check_decouverts() RETURNS VOID AS $$
        DECLARE
          curs CURSOR FOR (SELECT * FROM compte WHERE solde_compte < 0);
          entry RECORD;
+         test RECORD;
          today INTEGER;
          client INTEGER;
          nv_solde REAL;
@@ -402,7 +403,12 @@ CREATE OR REPLACE FUNCTION check_decouverts() RETURNS VOID AS $$
              --dépassement de découvert interdit : mis en interdit banquaire
              SELECT id_personne INTO client FROM compte_personne WHERE id_compte = entry.id_compte AND id_banque = entry.id_banque;
              today := aujourdhui();
-             INSERT INTO interdit_bancaire VALUES(entry.id_banque, client, 'dépassement de découvert', today, today+5*30*12);
+             -- test des interdictions encore en validité sur cette banque
+             SELECT  * INTO test FROM interdit_bancaire WHERE id_banque = entry.id_banque AND id_client = client AND (date_regularisation IS NULL OR date_regularisation > today);
+             IF test IS NULL THEN
+               -- on va pas insérer plusieurs fois
+               INSERT INTO interdit_bancaire VALUES(entry.id_banque, client, 'dépassement de découvert', today, today+5*30*12);
+             END IF;
            END IF;
          END LOOP;
          CLOSE curs;

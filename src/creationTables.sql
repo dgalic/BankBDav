@@ -73,5 +73,5 @@ CREATE TABLE interdit_bancaire (
     id_client INTEGER REFERENCES personne(id_personne) NOT NULL,
     motif VARCHAR(40) , --TODO : créer un type motif
     date_debut INTEGER NOT NULL,
-    date_regularisation INTEGER DEFAULT NULL
+    date_regularisation INTEGER DEFAULT NULL,
 );
