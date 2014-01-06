@@ -3,17 +3,41 @@ Bases de données avancées  :
 
 rapport de projet par David Galichet et Nicolas Cailloux
 
-
 I - Diagramme
-
-
+    Notre Diagramme se trouve sur les fichier diagrame.png et diagrame.dia    
 
 II - Schéma relationnel
+    
+    Primary key = & <nom champs,..>
+    Foreign key = # <nom champs>
 
+    - personne ( & id_personne);
+    - banque ( & id_banque);
+    - banque_reference ( # id_banque);    
+    - compte (
+        & (id_compte, id_banque),
+        # id_banque);
+    - compte_personne (
+        &  id_compte_personne,
+        #  (id_compte,id_banque),
+        #  id_personne);
+    - virement (
+        & id_virement,
+        # id_debiteur,
+        # id_crediteur);
+    - plan_virements( # id_virement);
+    - historique ( # id_compte_personne);
+    - interdit_bancaire (
+        # id_banque,
+        # id_client);
+    - plan_remunerations( # id_cp);
 
+    - carte( # id_compte_personne);
+    - carte_retrait(  # id_compte_personne) INHERITS (carte);
+    - carte_paiement( # id_compte_personne) INHERITS (carte);
+    - carte_credit (  # id_compte_personne) INHERITS (carte);
 
 III - Règles de gestion
-
 
 Chaque jour, on doit vérifier : 
 -si un virement doit être fait,
@@ -43,6 +67,10 @@ Cette fonction déclenche les vérifications des évènements temporels, tels qu
 
 IV - Mode d’emploi
 
+pour utiliser nos fichier sur la base psql:
+    - \i generation.sql : génère toutes les tables, fonctions et trigger
+    - \i donne.sql : ajoutent quelques données
+    - \i drop.sql  : supprimes toutes les tables, fonctions et trigger proprement
 
 -Il faut commencer par créer des banques : 
 creation banque(nom, liste des éléments par défaut);
@@ -100,30 +128,31 @@ Le client 1 possède le compte 0 chez la banque 4. Le id_compte_personne lié es
 De base, ce compte a un solde de 3000.
 
 Créez une carte de crédit : 
-carte_credit(1,4,0);
+    carte_credit(1,4,0);
 Celà crée la carte n°1 liée au compte cité.
+
 Et ajoutez du solde dessus : 
-ajoute_revolving(1, 1, 200);
+    ajoute_revolving(1, 1, 200);
 Le crédit de la carte augmente, celui du compte diminue. 
 Tentez d’ajouter beaucoup d’argent : 
-ajoute_revolving(1,1, 99999);
+    ajoute_revolving(1,1, 99999);
 Constatez que c’est impossible car aucun découvert ou dépassement de découvert n’est autorisé.
 
 Déposons un peu d’espèces : 
-depot(3, 300, ‘especes’);
+    depot(3, 300, ‘especes’);
 Retirons-en :
-retrait(3, 100, ‘especes’);
+        retrait(3, 100, ‘especes’);
 
-essayons un virement, au compte 4, qui appartient à TOM Cruise : 
-consultation_solde(‘Cruise’, TOM’);
-virement_unitaire(3, 4, montant, cout voulu);
-consultation_solde(‘Cruise’, TOM’);
+Essayons un virement, au compte 4, qui appartient à TOM Cruise : 
+    consultation_solde(‘Cruise’, TOM’);
+    virement_unitaire(3, 4, montant, cout voulu);
+    consultation_solde(‘Cruise’, TOM’);
 
 Un virement périodique ?
-virement_periodique(3, 4, 100, 7, 6, 2, NULL);
+    virement_periodique(3, 4, 100, 7, 6, 2, NULL);
+
 pour un virement de 100 tous les 6 mois à compter de demain, le cout initial étant 7 et le cout périodique étant 2.
 note : l’intervalle doit être 1, 3, 6 ou 12. 0 est accepté, et indique en fait un virement unique.
 
 
 
-
