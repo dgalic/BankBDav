@@ -42,8 +42,11 @@ CREATE OR REPLACE FUNCTION virement_periodique(id_src INTEGER, id_dest INTEGER, 
        DECLARE
          id INTEGER;
        BEGIN
+        IF inter = 0 THEN
+          RAISE 'Un virement période de période 0 est un virement unitaire : utilisez la fonction appropriée';
+        END IF;
 	IF date IS NULL THEN
-       	     date := aujourdhui();
+       	     date := aujourdhui()+1;
        	END IF;
 	IF id_src = id_dest THEN
 	cout_i := 0;

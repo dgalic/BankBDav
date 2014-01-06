@@ -81,8 +81,8 @@ from_compte_personne(id_compte_personne) qui renvoie l’id_personne, l’id_ban
 -On fait une virement unitaire entre deux comptes avec :
 virement_unitaire(compte_personne debiteur, compte_personne crediteur, montant)
 -Les virements périodiques, eux, sont gérés par : 
-virement_périodique(compte_personne debiteur, compte_personne crediteur, montant, cout_initial, intervalle, cout périodique, date);
-si date est NULL, c’est mis au jour courant, sinon ça dit dans combien de temps commencent les virements. comme tous nos mois font 30 jours, cela suffit pour avoir un virement au jour du mois près. 
+virement_périodique(compte_personne debiteur, compte_personne crediteur, montant, cout_initial, intervalle, cout périodique, délai);
+si délai est NULL, c’est mis au jour courant +1, sinon ça dit dans combien de temps commencent les virements. comme tous nos mois font 30 jours, cela suffit pour avoir un virement au jour du mois près. 
 Et intervalle doit être 1, 3, 6 ou 12. Si intervalle vaut 0, cela indique un virement unique.
 
 -Pour faire passer un jour, utiliser la fonction : 
@@ -121,6 +121,6 @@ consultation_solde(‘Cruise’, TOM’);
 
 Un virement périodique ?
 virement_periodique(3, 4, 100, 7, 6, 2, NULL);
-pour un virement de 100 tous les 6 mois, le cout initial étant 7 et le cout périodique étant 2, à compte d’aujourd’hui.
-note : l’intervalle doit être 1, 3, 6 ou 12. 0 est accepté, et indique un virement unique.
+pour un virement de 100 tous les 6 mois à compter de demain, le cout initial étant 7 et le cout périodique étant 2.
+note : l’intervalle doit être 1, 3, 6 ou 12. 0 est accepté, et indique en fait un virement unique.
 

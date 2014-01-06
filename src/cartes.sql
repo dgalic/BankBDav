@@ -15,7 +15,7 @@ CREATE TABLE carte_retrait (
     montant_atomique_autre REAL,
     montant_hebdomadaire_banque REAL NOT NULL, 
     montant_hebdomadaire_autre REAL,
-    anti_decouvert BOOLEAN NOT NULL,
+    depassement_autorise BOOLEAN NOT NULL,
     id_compte_personne INTEGER REFERENCES compte_personne(id_compte_personne)
 ) INHERITS (carte);
 

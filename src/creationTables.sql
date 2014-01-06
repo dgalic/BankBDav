@@ -24,7 +24,7 @@ CREATE TABLE banque_reference (
     agios REAL NOT NULL,
     atom_banque REAL NOT NULL,
     hebdo_banque REAL NOT NULL,
-    anti_decouvert BOOLEAN NOT NULL,
+    depassement_autorise BOOLEAN NOT NULL,
     portee VARCHAR(20) NOT NULL,
     cout REAL NOT NULL,
     atom_autre REAL,
@@ -45,7 +45,7 @@ CREATE TABLE compte (
     taux_remuneration REAL NOT NULL,
     decouvert_autorise REAL NOT NULL,
     taux_decouvert REAL NOT NULL,
-    depassement BOOLEAN NOT NULL,
+    depassement_autorise BOOLEAN NOT NULL,
     agios REAL NOT NULL,
     chequier BOOLEAN NOT NULL,
     typ_compte type_compte DEFAULT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE historique (
 CREATE TABLE interdit_bancaire (
     id_banque INTEGER REFERENCES banque(id_banque) NOT NULL,
     id_client INTEGER REFERENCES personne(id_personne) NOT NULL,
-    motif varchar(20) , --TODO : créer un type motif
+    motif VARCHAR(20) , --TODO : créer un type motif
     date_debut INTEGER NOT NULL,
     date_regularisation INTEGER DEFAULT NULL
 );

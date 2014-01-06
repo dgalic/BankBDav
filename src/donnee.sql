@@ -8,13 +8,13 @@ INSERT INTO personne (nom_personne, prenom_personne) VALUES
 -- nom, seuil_remuneration, periode_remuneration, taux_remuneration
 -- decouvert autorisé, taux_decouvert, agios, 
 -- montant atomique pour la banque, montant hebdomadaire pour la banque
--- protection anti-decouvert (vrai/faux), 
+-- dépassement de découvert autorisé (vrai/faux), 
 -- portee de la carte, cout de la carte
 -- montant atomique autres banques, montant hebdomadaire autres banques.
-select creation_banque('Bnp', 1, 30, 0.05, 100, 0.05, 0, 200, 100, FALSE, 'internationale', 20, 100, 500);
-select creation_banque('Lcl', 100, 15, 0.03, 0, 0, 0, 200, 100, FALSE, 'nationale', 20, 100, 500);
-select creation_banque('Cic', 0, 10, 0, 0.1, 0, 0, 200, 100, FALSE, 'nationale', 20, 100, 500);
-select creation_banque('Axa', 0, 1, 0, 0.005, 1000, 0, 200, 100, FALSE, 'nationale', 20, 100, 500);
+select creation_banque('Bnp', 1, 30, 0.05, 100, 0.5, 25, 200, 100, FALSE, 'internationale', 20, 100, 500);
+select creation_banque('Lcl', 100, 15, 0.03, 0, 0, 30, 200, 100, TRUE, 'nationale', 20, 100, 500);
+select creation_banque('Cic', 0, 10, 0, 0.1, 0, 40, 200, 100, FALSE, 'nationale', 20, 100, 500);
+select creation_banque('Axa', 0, 1, 0.005, 0, 0.10, 50, 200, 100, TRUE, 'nationale', 20, 100, 500);
 
 select ouverture_compte('Galichet', 'David', 'Bnp');;
 select ouverture_compte('Galichet', 'David', 'Bnp');;

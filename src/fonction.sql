@@ -1,14 +1,14 @@
 -- list les personnes existante
 CREATE OR REPLACE FUNCTION list_personne()
-RETURNS TABLE(nom TEXT, prenom TEXT) as $$
+RETURNS TABLE(nom TEXT, prenom TEXT, id INTEGER) as $$
 DECLARE
     client record;
 BEGIN
     FOR client IN
-    SELECT nom_personne as n, prenom_personne as p FROM personne
+    SELECT nom_personne as n, prenom_personne as p, id_personne as i FROM personne
     LOOP
     RETURN QUERY
-    SELECT client.n, client.p;
+    SELECT client.n, client.p, client.i;
     END LOOP;
 END;
 $$ LANGUAGE 'plpgsql';
@@ -16,19 +16,31 @@ $$ LANGUAGE 'plpgsql';
 
 -- list les banques existante
 CREATE OR REPLACE FUNCTION list_banque()
-RETURNS TABLE(nom TEXT) as $$
+RETURNS TABLE(nom TEXT, id INTEGER) as $$
 DECLARE
     banque record;
 BEGIN
     FOR banque IN
-    SELECT nom_banque as b FROM banque
+    SELECT nom_banque as b, id_banque as i FROM banque
     LOOP
     RETURN QUERY
-    SELECT banque.b;
+    SELECT banque.b, banque.i;
     END LOOP;
 END;
 $$ LANGUAGE 'plpgsql';
 ---------------------
+
+-- renvoie l'id de la personne
+CREATE OR REPLACE FUNCTION get_id(nom TEXT, prenom TEXT) RETURNS INTEGER AS $$
+       DECLARE
+         id INTEGER;
+       BEGIN
+         SELECT id_personne INTO id FROM personne WHERE nom_personne = nom AND prenom_personne = prenom;
+         RETURN id;
+       END;
+$$ LANGUAGE 'plpgsql';
+
+
 
 -- test si une personne existe
 CREATE OR REPLACE FUNCTION is_personne(nom TEXT, prenom text)
@@ -82,7 +94,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- creation d'une banque avec valeur de reference pour le compte
 CREATE OR REPLACE FUNCTION creation_banque
-(nom_b TEXT, seuil_rem REAL, periode_rem INTEGER, taux_rem REAL, decouvert REAL, taux_dec REAL, agios REAL, atom_banque REAL DEFAULT 500, hebdo_banque REAL DEFAULT 2500, anti_dec BOOLEAN DEFAULT FALSE, portee VARCHAR(20) DEFAULT 'nationale', cout REAL DEFAULT 20, atom_autre REAL DEFAULT 200, hebdo_autre INTEGER DEFAULT 1000)
+(nom_b TEXT, seuil_rem REAL, periode_rem INTEGER, taux_rem REAL, decouvert REAL, taux_dec REAL, agios REAL, atom_banque REAL DEFAULT 500, hebdo_banque REAL DEFAULT 2500, depasse_ok BOOLEAN DEFAULT TRUE, portee VARCHAR(20) DEFAULT 'nationale', cout REAL DEFAULT 20, atom_autre REAL DEFAULT 200, hebdo_autre INTEGER DEFAULT 1000)
 RETURNS BOOLEAN as $$
 DECLARE
    id_b INTEGER;
@@ -91,11 +103,12 @@ BEGIN
         RAISE NOTICE 'La banque % existe déjà', nom_b;
         RETURN false;
     END IF;
+--    RAISE NOTICE 'la banque % autorise les découverts : %', nom_b, depasse_ok;
     INSERT INTO banque (nom_banque) VALUES (nom_b);
     SELECT id_banque INTO id_b FROM banque WHERE nom_banque = nom_b ;
     INSERT INTO banque_reference
-    (id_banque, seuil_remuneration, periode_remuneration, taux_remuneration, decouvert_autorise, taux_decouvert, agios, atom_banque, hebdo_banque, anti_decouvert, portee, cout, atom_autre, hebdo_autre) VALUES
-    (id_b, seuil_rem, periode_rem, taux_rem, decouvert, taux_dec, agios, atom_banque, hebdo_banque, anti_dec, portee, cout, atom_autre, hebdo_autre);
+    (id_banque, seuil_remuneration, periode_remuneration, taux_remuneration, decouvert_autorise, taux_decouvert, agios, atom_banque, hebdo_banque, depassement_autorise, portee, cout, atom_autre, hebdo_autre) VALUES
+    (id_b, seuil_rem, periode_rem, taux_rem, decouvert, taux_dec, agios, atom_banque, hebdo_banque, depasse_ok, portee, cout, atom_autre, hebdo_autre);
     RETURN true;
 END;
 $$ LANGUAGE 'plpgsql';

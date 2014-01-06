@@ -19,6 +19,7 @@ DECLARE
     taux_d real;
     ref_agios real;
     id_c INTEGER;
+    depasse_ok BOOLEAN;
 BEGIN
 
     IF NOT is_banque(n_banque) THEN
@@ -44,8 +45,8 @@ BEGIN
    
    SELECT id_banque,nombre_compte INTO id_b, id_compte FROM banque WHERE nom_banque = n_banque ;
 
-   SELECT seuil_remuneration, periode_remuneration, taux_remuneration, decouvert_autorise, taux_decouvert, agios
-   INTO  seuil_r, periode_r, taux_r, dec, taux_d, ref_agios
+   SELECT seuil_remuneration, periode_remuneration, taux_remuneration, decouvert_autorise, taux_decouvert, agios, depassement_autorise
+   INTO  seuil_r, periode_r, taux_r, dec, taux_d, ref_agios, depasse_ok
    FROM banque_reference
    WHERE id_banque = id_b;
 
@@ -67,11 +68,11 @@ BEGIN
    IF nb_agios IS NOT NULL THEN
     ref_agios = agios;
    END IF;
-
+ 
    INSERT INTO compte
     (id_compte, seuil_remuneration, periode_remuneration,taux_remuneration,
-    decouvert_autorise,taux_decouvert,depassement,agios,chequier,id_banque) VALUES
-    (id_compte, seuil_r, periode_r, taux_r, dec, taux_d, false, ref_agios, false,id_b);
+    decouvert_autorise,taux_decouvert,depassement_autorise,agios,chequier,id_banque) VALUES
+    (id_compte, seuil_r, periode_r, taux_r, dec, taux_d, depasse_ok, ref_agios, false,id_b);
    
    INSERT INTO compte_personne (id_banque,id_compte,id_personne) VALUES
    (id_b, id_compte,client);
@@ -166,7 +167,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- consultation du solde des compte ou du compte de la personne
 CREATE OR REPLACE FUNCTION consultation_solde(nom TEXT, prenom text)
-RETURNS TABLE(banque TEXT, compte INTEGER, solde REAL, type_compte type_compte) as $$
+RETURNS TABLE(banque TEXT, id_banque INTEGER, compte INTEGER, solde REAL, type_compte type_compte) as $$
 DECLARE
     client_compte record; 
     client INTEGER;
@@ -183,12 +184,12 @@ BEGIN
     END IF;
 
     FOR client_compte IN
-        (SELECT nom_banque , id_compte, solde_compte, typ_compte 
+        (SELECT nom_banque, banque.id_banque, id_compte, solde_compte, typ_compte 
         FROM compte NATURAL JOIN banque NATURAL JOIN compte_personne 
         WHERE id_personne = client )
     LOOP
     RETURN QUERY
-    SELECT client_compte.nom_banque, client_compte.id_compte, client_compte.solde_compte, client_compte.typ_compte;
+    SELECT client_compte.nom_banque, client_compte.id_banque, client_compte.id_compte, client_compte.solde_compte, client_compte.typ_compte;
     END LOOP;
 END;
 $$ LANGUAGE 'plpgsql';
@@ -272,7 +273,6 @@ DECLARE
     retrait_banque INTEGER;
     retrait_compte INTEGER;
     retrait_negatif REAL;
-    _depassement_autorise REAL;
     _c compte%ROWTYPE;
 BEGIN
     SELECT id_banque, id_compte
@@ -290,8 +290,7 @@ BEGIN
         WHERE id_compte = retrait_compte
         AND id_banque = retrait_banque;
          
-    IF _c.depassement = TRUE 
-        OR _c.solde_compte >= montant_retrait 
+    IF _c.solde_compte >= montant_retrait 
         OR montant_retrait-_c.solde_compte <= _c.decouvert_autorise THEN
             
             jour_actuel = aujourdhui();
@@ -307,10 +306,6 @@ BEGIN
            
            RETURN TRUE;
     END IF;
-
-    _depassement_autorise = _c.solde_compte + _c.decouvert_autorise;
-    RAISE NOTICE 'Impossible de retirer autant d''argent : il y a % de découvert sans dépassement autorisé\n',_depassement_autorise;
-    RAISE NOTICE 'Et vous voulez retirer %\n', montant_retrait;
     RETURN FALSE;
 END;
 $$ LANGUAGE 'plpgsql';
@@ -387,3 +382,36 @@ CREATE OR REPLACE FUNCTION plan_remuneration() RETURNS VOID AS $$
          CLOSE curs;
        END;
 $$ LANGUAGE 'plpgsql';
+----------------------
+
+
+CREATE OR REPLACE FUNCTION check_decouverts() RETURNS VOID AS $$
+       DECLARE
+         curs CURSOR FOR (SELECT * FROM compte WHERE solde_compte < 0);
+         entry RECORD;
+         today INTEGER;
+         client INTEGER;
+         nv_solde REAL;
+       BEGIN
+         OPEN curs;
+         LOOP
+           FETCH FROM curs INTO entry;
+           EXIT WHEN NOT FOUND;
+           -- les éléments du curseur sont les clients à découvert
+           nv_solde := entry.solde_compte *(1 + entry.taux_decouvert);
+           UPDATE compte SET solde_compte = nv_solde WHERE id_compte = entry.id_compte AND id_banque = entry.id_banque; -- prise de la commission
+           IF  entry.depassement_autorise THEN
+             --dépassement de découvert autorisé : prise d'agios
+             nv_solde := entry.solde_compte - entry.agios;
+             UPDATE compte SET solde_compte = nv_solde WHERE id_compte = entry.id_compte AND id_banque = entry.id_banque; -- prise de la commission
+           ELSE
+             --dépassement de découvert interdit : mis en interdit banquaire
+             SELECT id_personne INTO client FROM compte_personne WHERE id_compte = entry.id_compte AND id_banque = entry.id_banque;
+             today := aujourdhui();
+             INSERT INTO interdit_bancaire VALUES(entry.id_banque, client, 'dépassement de découvert', today, today+5*30*12);
+           END IF;
+         END LOOP;
+         CLOSE curs;
+       END;
+$$ LANGUAGE 'plpgsql';
+----------------------

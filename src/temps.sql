@@ -29,7 +29,7 @@ CREATE OR REPLACE FUNCTION passe_jours(n INTEGER DEFAULT 1) RETURNS VOID AS $$
            -- insérer ici les choses à vérifier après une certaine période
            PERFORM plan_virements();
            PERFORM plan_remuneration();
-           
+           PERFORM check_decouverts();
 
            -- fin des vérifications relatives au temps
          END LOOP;
