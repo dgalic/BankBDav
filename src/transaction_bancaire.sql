@@ -106,27 +106,23 @@ BEGIN
        RETURN false;
     END IF;
     
-    --TODO si le temps implementer les comptes joints
-    --TODO si carte implementer supprimer les cartes jointes au compte
-    --TODO supprimer l'historique du compte
-
     SELECT * INTO compte_t
-    FROM compte
-    WHERE id_compte = compte_id
-    AND id_banque = banque_id;
+        FROM compte
+        WHERE id_compte = compte_id
+        AND id_banque = banque_id;
     
     DELETE FROM compte_personne
-    WHERE id_personne = client_id
-    AND id_banque = banque_id
-    AND id_compte = compte_id;
+        WHERE id_personne = client_id
+        AND id_banque = banque_id
+        AND id_compte = compte_id;
 
     DELETE FROM compte
-    WHERE id_banque = banque_id
-    AND id_compte = compte_id;
+        WHERE id_banque = banque_id
+        AND id_compte = compte_id;
 
     UPDATE banque
-    SET nombre_compte = nombre_compte - 1
-    WHERE id_banque = banque_id;
+        SET nombre_compte = nombre_compte - 1
+        WHERE id_banque = banque_id;
 
     RETURN true;
 END
@@ -342,72 +338,101 @@ END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
 
-
-CREATE TABLE plan_remunerations(
-    id_cp INTEGER REFERENCES compte_personne(id_compte_personne),
-    date_prochain INTEGER
-);
-
-
+----------------------
 CREATE OR REPLACE FUNCTION plan_remuneration() RETURNS VOID AS $$
-       DECLARE
-         curs CURSOR FOR (SELECT * FROM plan_remunerations);
-         entry RECORD;
-         account RECORD;
-         today INTEGER;
-         nv_solde REAL;
-       BEGIN
-         OPEN curs;
-         today := aujourdhui();
-         LOOP
-           FETCH FROM curs INTO entry;
-           EXIT WHEN NOT FOUND;
-           IF(entry.date_prochain = today) THEN
+DECLARE
+    curs CURSOR FOR (SELECT * FROM plan_remunerations);
+    entry RECORD;
+    account RECORD;
+    today INTEGER;
+    nv_solde REAL;
+BEGIN
+    OPEN curs;
+    today := aujourdhui();
+    LOOP
+        FETCH FROM curs INTO entry;
+        
+        EXIT WHEN NOT FOUND;
+        IF(entry.date_prochain = today) THEN
+             
              --on doit vérifier que le client atteint le seuil de rémunération
-             SELECT solde_compte, seuil_remuneration, taux_remuneration, periode_remuneration, id_compte, id_banque INTO account FROM compte NATURAL JOIN (SELECT * FROM compte_personne WHERE id_compte_personne = entry.id_cp) AS c;
+             SELECT solde_compte, seuil_remuneration, taux_remuneration, periode_remuneration, id_compte, id_banque 
+                INTO account 
+                FROM compte NATURAL JOIN 
+                    (SELECT * FROM compte_personne 
+                        WHERE id_compte_personne = entry.id_cp) 
+                AS c;
+             
              IF (account.solde_compte >= account.seuil_remuneration) THEN
-               nv_solde := account.solde_compte * (1.0 + account.taux_remuneration);
-               UPDATE compte SET solde_compte = nv_solde WHERE id_compte = account.id_compte AND id_banque = account.id_banque;
+                nv_solde := account.solde_compte * (1.0 + account.taux_remuneration);
+                UPDATE compte 
+                    SET solde_compte = nv_solde 
+                    WHERE id_compte = account.id_compte 
+                    AND id_banque = account.id_banque;
              END IF;
+             
              today := today + account.periode_remuneration;
-             UPDATE plan_remunerations SET date_prochain = today WHERE id_cp = entry.id_cp;
+             UPDATE plan_remunerations 
+                SET date_prochain = today 
+                WHERE id_cp = entry.id_cp;
            END IF;
-         END LOOP;
-         CLOSE curs;
-       END;
+    END LOOP;
+    CLOSE curs;
+END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
 
-
+----------------------
 CREATE OR REPLACE FUNCTION check_decouverts() RETURNS VOID AS $$
-       DECLARE
-         curs CURSOR FOR (SELECT * FROM compte WHERE solde_compte < 0);
-         entry RECORD;
-         test RECORD;
-         today INTEGER;
-         client INTEGER;
-         nv_solde REAL;
-       BEGIN
-         OPEN curs;
-         LOOP
-           FETCH FROM curs INTO entry;
-           EXIT WHEN NOT FOUND;
-           -- les éléments du curseur sont les clients à découvert
-           nv_solde := entry.solde_compte *(1 + entry.taux_decouvert);
-           UPDATE compte SET solde_compte = nv_solde WHERE id_compte = entry.id_compte AND id_banque = entry.id_banque; -- prise de la commission
-           IF  entry.depassement_autorise THEN
+DECLARE
+    curs CURSOR FOR (SELECT * FROM compte WHERE solde_compte < 0);
+    entry RECORD;
+    test RECORD;
+    today INTEGER;
+    client INTEGER;
+    nv_solde REAL;
+BEGIN
+    OPEN curs;
+    LOOP
+        FETCH FROM curs INTO entry;
+        EXIT WHEN NOT FOUND;
+        
+        -- les éléments du curseur sont les clients à découvert
+        nv_solde := entry.solde_compte *(1 + entry.taux_decouvert);
+        UPDATE compte 
+            SET solde_compte = nv_solde 
+            WHERE id_compte = entry.id_compte 
+            AND id_banque = entry.id_banque; -- prise de la commission
+        
+        IF  entry.depassement_autorise THEN
              --dépassement de découvert autorisé : prise d'agios
              nv_solde := entry.solde_compte - entry.agios;
-             UPDATE compte SET solde_compte = nv_solde WHERE id_compte = entry.id_compte AND id_banque = entry.id_banque; -- prise de la commission
-           ELSE
+             
+             UPDATE compte 
+                SET solde_compte = nv_solde 
+                WHERE id_compte = entry.id_compte 
+                AND id_banque = entry.id_banque; -- prise de la commission
+        ELSE
              --dépassement de découvert interdit : mis en interdit banquaire
-             SELECT id_personne INTO client FROM compte_personne WHERE id_compte = entry.id_compte AND id_banque = entry.id_banque;
+             SELECT id_personne 
+                INTO client 
+                FROM compte_personne 
+                WHERE id_compte = entry.id_compte 
+                AND id_banque = entry.id_banque;
+             
              today := aujourdhui();
              -- test des interdictions encore en validité sur cette banque
-             SELECT  * INTO test FROM interdit_bancaire WHERE id_banque = entry.id_banque AND id_client = client AND (date_regularisation IS NULL OR date_regularisation > today);
+             SELECT  * INTO test 
+                FROM interdit_bancaire 
+                WHERE id_banque = entry.id_banque 
+                AND id_client = client 
+                AND (date_regularisation IS NULL 
+                        OR date_regularisation > today);
+             
              IF test IS NULL THEN
                -- on va pas insérer plusieurs fois
-               INSERT INTO interdit_bancaire VALUES(entry.id_banque, client, 'dépassement de découvert', today, today+5*30*12);
+               INSERT INTO interdit_bancaire 
+                VALUES(entry.id_banque, client, 'dépassement de découvert', today, today+5*30*12);
              END IF;
            END IF;
          END LOOP;
@@ -416,37 +441,50 @@ CREATE OR REPLACE FUNCTION check_decouverts() RETURNS VOID AS $$
 $$ LANGUAGE 'plpgsql';
 ----------------------
 
-
-
+----------------------
 CREATE OR REPLACE FUNCTION check_liberations() RETURNS VOID AS $$
-       DECLARE
-         interdits CURSOR FOR (SELECT * FROM interdit_bancaire);
-         comptes REFCURSOR;
-         entry_i RECORD;
-         entry_c RECORD;
-         today INTEGER;
-         client INTEGER;
-         count_dec INTEGER;
-         nv_solde REAL;
-       BEGIN
-         OPEN interdits;
-         today := aujourdhui();
-         LOOP
-           FETCH FROM interdits INTO entry_i;
-           EXIT WHEN NOT FOUND;
-           --pour chaque personne interdite, on regarde si dans chacun de ses comptes elle est revenu en positif. dès qu'on trouve 1 compte à découvert, on passe.
-           count_dec := 0;
-           OPEN comptes FOR (SELECT * FROM compte NATURAL JOIN (SELECT * FROM compte_personne WHERE id_personne = entry_i.id_client AND id_banque = entry_i.id_banque) AS cp);
-           LOOP
-             FETCH FROM comptes INTO entry_c;
-             --on regarde tous les comptes de la banque, voir si ils sont encore à découvert ou non
-             EXIT WHEN NOT FOUND;
-             IF entry_c.solde_compte < 0 THEN
-               count_dec := count_dec+1;
-             END IF;
-           END LOOP;
+DECLARE
+    interdits CURSOR FOR (SELECT * FROM interdit_bancaire);
+    comptes REFCURSOR;
+    entry_i RECORD;
+    entry_c RECORD;
+    today INTEGER;
+    client INTEGER;
+    count_dec INTEGER;
+    nv_solde REAL;
+BEGIN
+    OPEN interdits;
+    today := aujourdhui();
+    LOOP
+        FETCH FROM interdits INTO entry_i;
+        EXIT WHEN NOT FOUND;
+        
+        -- pour chaque personne interdite, on regarde si dans chacun de ses comptes elle est revenu en positif.
+        -- dès qu'on trouve 1 compte à découvert, on passe.
+        count_dec := 0;
+        OPEN comptes FOR 
+            (SELECT * FROM compte 
+                NATURAL JOIN 
+                    (SELECT * FROM compte_personne 
+                        WHERE id_personne = entry_i.id_client 
+                        AND id_banque = entry_i.id_banque)
+                    AS cp);
+            LOOP
+                FETCH FROM comptes INTO entry_c;
+                
+                --on regarde tous les comptes de la banque, voir si ils sont encore à découvert ou non
+                EXIT WHEN NOT FOUND;
+             
+                IF entry_c.solde_compte < 0 THEN
+                    count_dec := count_dec+1;
+                END IF;
+            END LOOP;
+           
            IF count_dec > 0 THEN
-             UPDATE interdit_bancaire SET date_regularisation = today WHERE id_client = entry_i.id_client AND id_banque = entry_i.id_banque;
+            UPDATE interdit_bancaire 
+                SET date_regularisation = today 
+                WHERE id_client = entry_i.id_client 
+                AND id_banque = entry_i.id_banque;
            END IF;
            CLOSE comptes;
          END LOOP;
