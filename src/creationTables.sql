@@ -25,7 +25,7 @@ CREATE TABLE banque_reference (
     atom_banque REAL NOT NULL,
     hebdo_banque REAL NOT NULL,
     anti_decouvert BOOLEAN NOT NULL,
-    portee VARCHAR(10) NOT NULL,
+    portee VARCHAR(20) NOT NULL,
     cout REAL NOT NULL,
     atom_autre REAL,
     hebdo_autre REAL,

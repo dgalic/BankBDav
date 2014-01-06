@@ -11,7 +11,7 @@
 \i fonction.sql
 \i transaction_bancaire.sql
 
+\i virements.sql
+
 --insertion des données
 \i donnee.sql
-
-\i virements.sql

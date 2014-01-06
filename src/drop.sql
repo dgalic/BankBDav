@@ -32,7 +32,7 @@ agios REAL,
 atom_banque REAL,
 hebdo_banque REAL,
 anti_dec BOOLEAN,
-portee VARCHAR(10),
+portee VARCHAR(20),
 cout REAL,
 atom_autre REAL,
 hebdo_autre INTEGER );

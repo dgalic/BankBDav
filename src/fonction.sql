@@ -62,7 +62,7 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION is_interdit_bancaire(client int)
 RETURNS BOOLEAN as $$
 DECLARE
-    date_actuel int;
+    date_actuel INTEGER;
     interdit record;
 BEGIN
     date_actuel := aujourdhui();
@@ -82,10 +82,10 @@ $$ LANGUAGE 'plpgsql';
 
 -- creation d'une banque avec valeur de reference pour le compte
 CREATE OR REPLACE FUNCTION creation_banque
-(nom_b TEXT, seuil_rem REAL, periode_rem INTEGER, taux_rem REAL, decouvert REAL, taux_dec REAL, agios REAL, atom_banque REAL DEFAULT 500, hebdo_banque REAL DEFAULT 2500, anti_dec BOOLEAN DEFAULT FALSE, portee VARCHAR(10) DEFAULT 'nationale', cout REAL DEFAULT 20, atom_autre REAL DEFAULT 200, hebdo_autre INTEGER DEFAULT 1000)
+(nom_b TEXT, seuil_rem REAL, periode_rem INTEGER, taux_rem REAL, decouvert REAL, taux_dec REAL, agios REAL, atom_banque REAL DEFAULT 500, hebdo_banque REAL DEFAULT 2500, anti_dec BOOLEAN DEFAULT FALSE, portee VARCHAR(20) DEFAULT 'nationale', cout REAL DEFAULT 20, atom_autre REAL DEFAULT 200, hebdo_autre INTEGER DEFAULT 1000)
 RETURNS BOOLEAN as $$
 DECLARE
-   id_b int;
+   id_b INTEGER;
 BEGIN
     if is_banque(nom_b) THEN
         RAISE NOTICE 'La banque % existe déjà', nom_b;

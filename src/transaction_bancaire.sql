@@ -9,15 +9,16 @@ CREATE OR REPLACE FUNCTION ouverture_compte
     nb_agios REAL DEFAULT NULL)
 RETURNS BOOLEAN as $$
 DECLARE
-    client int;
-    id_b int;
-    id_compte int;
+    client INTEGER;
+    id_b INTEGER;
+    id_compte INTEGER;
     seuil_r real;
-    periode_r int;
+    periode_r INTEGER;
     taux_r real;
     dec real;
     taux_d real;
     ref_agios real;
+    id_c INTEGER;
 BEGIN
 
     IF NOT is_banque(n_banque) THEN
@@ -75,10 +76,14 @@ BEGIN
    INSERT INTO compte_personne (id_banque,id_compte,id_personne) VALUES
    (id_b, id_compte,client);
    
+   id_c := to_compte_personne(client, id_compte, id_b);
+   periode_r := periode_r+aujourdhui();
+   INSERT INTO plan_remunerations VALUES(id_c, periode_r);
+
    UPDATE banque
    SET nombre_compte = nombre_compte + 1
    WHERE id_banque = id_b;
-
+   
    RETURN true;
 END;
 $$ LANGUAGE 'plpgsql';
@@ -359,8 +364,9 @@ CREATE OR REPLACE FUNCTION plan_remuneration() RETURNS VOID AS $$
        DECLARE
          curs CURSOR FOR (SELECT * FROM plan_remunerations);
          entry RECORD;
-         account compte%ROWTYPE;
+         account RECORD;
          today INTEGER;
+         nv_solde REAL;
        BEGIN
          OPEN curs;
          today := aujourdhui();
@@ -369,11 +375,13 @@ CREATE OR REPLACE FUNCTION plan_remuneration() RETURNS VOID AS $$
            EXIT WHEN NOT FOUND;
            IF(entry.date_prochain = today) THEN
              --on doit vérifier que le client atteint le seuil de rémunération
-             SELECT * INTO account FROM compte NATURAL JOIN (SELECT * FROM compte_personne WHERE id_compte_personne = curs.id_cp);
+             SELECT solde_compte, seuil_remuneration, taux_remuneration, periode_remuneration, id_compte, id_banque INTO account FROM compte NATURAL JOIN (SELECT * FROM compte_personne WHERE id_compte_personne = entry.id_cp) AS c;
              IF (account.solde_compte >= account.seuil_remuneration) THEN
-               UPDATE compte SET solde_compte := account.solde_compte*(1+account.taux_remuneration) WHERE id_compte = account.id_compte AND id_banque = account.id_banque;
+               nv_solde := account.solde_compte * (1.0 + account.taux_remuneration);
+               UPDATE compte SET solde_compte = nv_solde WHERE id_compte = account.id_compte AND id_banque = account.id_banque;
              END IF;
-             UPDATE plan_remuneration SET date_prochain = today + periode_remuneration WHERE id_cp = entry.id_cp;
+             today := today + account.periode_remuneration;
+             UPDATE plan_remunerations SET date_prochain = today WHERE id_cp = entry.id_cp;
            END IF;
          END LOOP;
          CLOSE curs;
