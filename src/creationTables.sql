@@ -71,7 +71,7 @@ CREATE TABLE historique (
 CREATE TABLE interdit_bancaire (
     id_banque INTEGER REFERENCES banque(id_banque) NOT NULL,
     id_client INTEGER REFERENCES personne(id_personne) NOT NULL,
-    motif VARCHAR(20) , --TODO : créer un type motif
+    motif VARCHAR(40) , --TODO : créer un type motif
     date_debut INTEGER NOT NULL,
     date_regularisation INTEGER DEFAULT NULL
 );

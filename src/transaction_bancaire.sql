@@ -290,11 +290,7 @@ BEGIN
         WHERE id_compte = retrait_compte
         AND id_banque = retrait_banque;
          
-    IF _c.solde_compte >= montant_retrait 
-        OR montant_retrait-_c.solde_compte <= _c.decouvert_autorise THEN
-            
-            jour_actuel = aujourdhui();
-            
+
             UPDATE compte 
                 SET solde_compte = solde_compte - montant_retrait 
                 WHERE id_compte = retrait_compte
@@ -305,8 +301,6 @@ BEGIN
                 VALUES (jour_actuel, id_client_compte, moyen_paiement, montant_retrait);
            
            RETURN TRUE;
-    END IF;
-    RETURN FALSE;
 END;
 $$ LANGUAGE 'plpgsql';
 ---------------------
