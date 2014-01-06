@@ -42,8 +42,12 @@ DROP FUNCTION to_compte_personne(client_id INTEGER, compte_id INTEGER, banque_id
 DROP FUNCTION from_compte_personne(id INTEGER);
 DROP FUNCTION obtenir_chequier(id_client_compte INTEGER);
 
+DROP FUNCTION plan_virements();
+DROP FUNCTION plan_remunerations();
 
 -- Nettoyage de la base de donnees
+DROP TABLE plan_virements CASCADE;
+DROP TABLE plan_remunerations CASCADE;
 DROP TABLE interdit_bancaire;
 DROP TABLE historique CASCADE;
 DROP TABLE compte_personne CASCADE;
@@ -56,7 +60,6 @@ DROP TABLE carte_retrait CASCADE;
 DROP TABLE carte_paiement CASCADE;
 DROP TABLE carte_credit CASCADE;
 DROP TABLE carte CASCADE;
-DROP TABLE plan_virements CASCADE;
 DROP TABLE virement CASCADE;
 
 -- Nettoyage des types

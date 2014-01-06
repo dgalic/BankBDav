@@ -347,3 +347,35 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 ----------------------
+
+
+CREATE TABLE plan_remunerations(
+    id_cp INTEGER REFERENCES compte_personne(id_compte_personne),
+    date_prochain INTEGER
+);
+
+
+CREATE OR REPLACE FUNCTION plan_remuneration() RETURNS VOID AS $$
+       DECLARE
+         curs CURSOR FOR (SELECT * FROM plan_remunerations);
+         entry RECORD;
+         account compte%ROWTYPE;
+         today INTEGER;
+       BEGIN
+         OPEN curs;
+         today := aujourdhui();
+         LOOP
+           FETCH FROM curs INTO entry;
+           EXIT WHEN NOT FOUND;
+           IF(entry.date_prochain = today) THEN
+             --on doit vérifier que le client atteint le seuil de rémunération
+             SELECT * INTO account FROM compte NATURAL JOIN (SELECT * FROM compte_personne WHERE id_compte_personne = curs.id_cp);
+             IF (account.solde_compte >= account.seuil_remuneration) THEN
+               UPDATE compte SET solde_compte := account.solde_compte*(1+account.taux_remuneration) WHERE id_compte = account.id_compte AND id_banque = account.id_banque;
+             END IF;
+             UPDATE plan_remuneration SET date_prochain = today + periode_remuneration WHERE id_cp = entry.id_cp;
+           END IF;
+         END LOOP;
+         CLOSE curs;
+       END;
+$$ LANGUAGE 'plpgsql';

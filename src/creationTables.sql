@@ -1,5 +1,6 @@
 -- Creation de type
 CREATE TYPE type_paiement AS ENUM ('especes','cheque','carte','virement');
+CREATE TYPE type_compte AS ENUM('AND', 'OR');
 
 -- Creation des tables
 CREATE TABLE personne (
@@ -57,8 +58,7 @@ CREATE TABLE compte_personne (
     id_compte INTEGER,
     id_banque INTEGER,
     id_personne INTEGER REFERENCES personne(id_personne),
-    FOREIGN KEY (id_compte, id_banque) REFERENCES compte (id_compte, id_banque),
-    ON DELETE CASCADE
+    FOREIGN KEY (id_compte, id_banque) REFERENCES compte (id_compte, id_banque) 
 );
 
 CREATE TABLE historique (

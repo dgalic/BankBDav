@@ -28,6 +28,7 @@ CREATE OR REPLACE FUNCTION passe_jours(n INTEGER DEFAULT 1) RETURNS VOID AS $$
            it := it+1;
            -- insérer ici les choses à vérifier après une certaine période
            PERFORM plan_virements();
+           PERFORM plan_remuneration();
            
 
            -- fin des vérifications relatives au temps

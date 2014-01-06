@@ -95,7 +95,7 @@ ajoute_revolving(client, carte, montant);
 
 V - Exemples
 
-Quelques tests déjà faits : 
+Quelques tests à faire : 
 Le client 1 possède le compte 0 chez la banque 4. Le id_compte_personne lié est 3.
 De base, ce compte a un solde de 3000.
 

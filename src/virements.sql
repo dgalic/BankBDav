@@ -62,23 +62,22 @@ $$ LANGUAGE 'plpgsql';
 CREATE OR REPLACE FUNCTION plan_virements() RETURNS VOID AS $$
        DECLARE
          curs CURSOR FOR (SELECT * FROM plan_virements);
-         rec RECORD;
+         entry RECORD;
          vir RECORD;
          today INTEGER;
        BEGIN
          OPEN curs;
          today := aujourdhui();
          LOOP
-           FETCH FROM curs INTO rec;
+           FETCH FROM curs INTO entry;
            EXIT WHEN NOT FOUND;
-           IF(rec.date_prochain = today ) THEN
+           IF(entry.date_prochain = today ) THEN
              -- effectue un virement
-             SELECT * INTO vir FROM virement WHERE intervalle != 0 AND id_virement = rec.id_virement;
+             SELECT * INTO vir FROM virement WHERE intervalle != 0 AND id_virement = entry.id_virement;
              IF retrait(vir.id_debiteur, vir.montant + vir.cout_periodique, 'virement') THEN 
 	       PERFORM depot(vir.id_crediteur, vir.montant, 'virement');
              END IF;
-             --PERFORM virement_unitaire(vir.id_debiteur, vir.id_crediteur, vir.montant, vir.cout_periodique);
-             UPDATE plan_virements SET date_prochain = 30*vir.intervalle+today;
+             UPDATE plan_virements SET date_prochain = 30*vir.intervalle+today WHERE id_virement = entry.id_virement;
            END IF;
          END LOOP;
          CLOSE curs;
